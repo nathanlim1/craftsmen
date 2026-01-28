@@ -44,7 +44,7 @@ Sign in with your Minecraft account if prompted.
 2. Choose **Create from scratch**
 3. Configure:
 
-   * **Game Version**: a stable release supported by Minescript
+   * **Game Version**: 1.21.11
    * **Mod Loader**: **Fabric**
 4. Create the instance
 
@@ -54,7 +54,7 @@ Sign in with your Minecraft account if prompted.
 
 1. Open the instance
 2. Go to the **Mods** tab
-3. Install **Minescript**
+3. Install **Minescript**, version 5.0b9 w/ Fabric
 4. Install **Fabric API** if prompted (required)
 
 ---
