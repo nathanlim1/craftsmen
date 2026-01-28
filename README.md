@@ -9,8 +9,11 @@ RUNNING ON MINECRAFT 1.21.11 WITH MINESCRIPT 5.0b9
 To run these scripts with Minescript, you must edit your Minecraft instance’s
 `minescript/config.txt`.
 
-1. Add your repository folder to Minescript’s command search path using `command_path`.
-2. On macOS, multiple paths are separated by `:` and it’s best practice to include `.` so Minescript still searches its own directory.
+1. Set the Python interpreter path.
+2. Add your repository folder to Minescript’s command search path.
+3. Configure the listener to start automatically when entering a world.
+
+On macOS, multiple paths in `command_path` are separated by `:`. It’s best practice to include `.` so Minescript still searches its own directory.
 
 #### Example `config.txt`
 
@@ -19,10 +22,7 @@ To run these scripts with Minescript, you must edit your Minecraft instance’s
 
 python="/usr/bin/python3"
 command_path=".:/Users/natha/Projects/craftsmen"
-```
 
-With this configuration, you can run any Python file in the repository directly from in-game chat using:
-
-```
-\script_name
+# Automatically start the listener when entering any world
+autorun[*]=listener
 ```
