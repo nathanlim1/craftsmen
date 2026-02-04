@@ -1,7 +1,7 @@
 import sys
 import socket
 import json
-from typing import Tuple, Dict, Any
+from typing import Tuple, Dict, Any, List
 
 class MinecraftClient:
     """
@@ -78,9 +78,25 @@ class MinecraftClient:
         """Queries the world state for the block at the specified coordinates."""
         return self._send_command("get_block_at", x, y, z)
 
+    def get_blocks_in_bounds(
+        self,
+        bounds_min: Tuple[int, int, int],
+        bounds_max: Tuple[int, int, int],
+    ) -> List[Dict[str, Any]]:
+        """Returns a list of blocks within bounds as {x,y,z,block}."""
+        return self._send_command("get_blocks_in_bounds", bounds_min, bounds_max)
+
     def get_inventory(self) -> Dict[str, int]:
         """Returns the current inventory as a dict of item_name -> count."""
         return self._send_command("get_inventory")
+
+    def place_ops(self, ops: List[Dict[str, Any]]) -> None:
+        """Batch place blocks. Each op: {x,y,z,block}."""
+        self._send_command("place_ops", ops)
+
+    def remove_ops(self, ops: List[Dict[str, Any]]) -> None:
+        """Batch remove blocks. Each op: {x,y,z}."""
+        self._send_command("remove_ops", ops)
 
     def set_inventory(self, block_type: str, count: int) -> None:
         """Sets the inventory count for a specific block type (Helper for testing)."""

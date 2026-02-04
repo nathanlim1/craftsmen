@@ -54,6 +54,20 @@ def handle_command(cmd_data):
             return block_id.split(":")[1]
         return block_id
 
+    elif method == "get_blocks_in_bounds":
+        bounds_min, bounds_max = params
+        min_x, min_y, min_z = bounds_min
+        max_x, max_y, max_z = bounds_max
+        blocks = []
+        for x in range(int(min_x), int(max_x) + 1):
+            for y in range(int(min_y), int(max_y) + 1):
+                for z in range(int(min_z), int(max_z) + 1):
+                    block_id = minescript.getblock(x, y, z)
+                    if block_id.startswith("minecraft:"):
+                        block_id = block_id.split(":")[1]
+                    blocks.append({"x": x, "y": y, "z": z, "block": block_id})
+        return blocks
+
     elif method == "get_inventory":
         return get_inventory_dict()
 
@@ -70,6 +84,28 @@ def handle_command(cmd_data):
         minescript.execute(f"give @p {full_block_name} 1")
         minescript.execute(f"setblock {x} {y} {z} {full_block_name}")
         minescript.execute(f"clear @p {full_block_name} 1")
+        return True
+
+    elif method == "place_ops":
+        ops = params[0]
+        for op in ops:
+            x, y, z = op["x"], op["y"], op["z"]
+            block_type = op["block"]
+            if block_type.startswith("minecraft:"):
+                simple_type = block_type.split(":")[1]
+            else:
+                simple_type = block_type
+            full_block_name = f"minecraft:{simple_type}"
+            minescript.execute(f"give @p {full_block_name} 1")
+            minescript.execute(f"setblock {x} {y} {z} {full_block_name}")
+            minescript.execute(f"clear @p {full_block_name} 1")
+        return True
+
+    elif method == "remove_ops":
+        ops = params[0]
+        for op in ops:
+            x, y, z = op["x"], op["y"], op["z"]
+            minescript.execute(f"setblock {x} {y} {z} minecraft:air")
         return True
 
     elif method == "set_inventory":
