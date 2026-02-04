@@ -59,25 +59,18 @@ def handle_command(cmd_data):
 
     elif method == "place_block":
         x, y, z, block_type = params
-        # Server-side logic for consistency and speed
-        inv = get_inventory_dict()
-        
         # Normalize block_type
         if block_type.startswith("minecraft:"):
             simple_type = block_type.split(":")[1]
         else:
             simple_type = block_type
-        
-        # Check if we have it
-        count = inv.get(simple_type, 0)
-        
-        if count > 0:
-            full_block_name = f"minecraft:{simple_type}"
-            minescript.execute(f"setblock {x} {y} {z} {full_block_name}")
-            minescript.execute(f"clear @p {full_block_name} 1")
-            return True
-        else:
-            return False
+
+        full_block_name = f"minecraft:{simple_type}"
+        # Ensure the player has the block for this placement.
+        minescript.execute(f"give @p {full_block_name} 1")
+        minescript.execute(f"setblock {x} {y} {z} {full_block_name}")
+        minescript.execute(f"clear @p {full_block_name} 1")
+        return True
 
     elif method == "set_inventory":
         block_type, count = params

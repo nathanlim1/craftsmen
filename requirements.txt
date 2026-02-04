@@ -1,1 +1,6 @@
-minescript
+langgraph
+openai
+dotenv
+langchain
+langchain-openai
+pydantic
