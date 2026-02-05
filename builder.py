@@ -1,15 +1,16 @@
+import os
 import time
 from dataclasses import dataclass
 from typing import List, Optional, Tuple, TypedDict
 from dotenv import load_dotenv
 from langgraph.graph import END, StateGraph
-from langchain_openai import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, SystemMessage
 from pydantic import BaseModel, Field
 from minecraft_client import MinecraftClient
 
 
-load_dotenv()
+print(f"Environment Loaded: {load_dotenv()}")
 
 @dataclass
 class BlockOp:
@@ -47,7 +48,7 @@ class Builder:
     def __init__(
         self,
         client: MinecraftClient,
-        model: str = "gpt-5.1",
+        model: str = "gemini-2.0-flash-lite",
         max_blocks: int = 600,
         max_retries: int = 2,
         throttle_seconds: float = 0.05,
@@ -57,7 +58,7 @@ class Builder:
         self.max_blocks = max_blocks
         self.max_retries = max_retries
         self.throttle_seconds = throttle_seconds  # Time to wait between placing blocks for lag
-        self._structured_model = ChatOpenAI(model=self.model).with_structured_output(PlanSchema)
+        self._structured_model = ChatGoogleGenerativeAI(model=self.model).with_structured_output(PlanSchema)
         self._graph = self._build_graph()
 
     def build(

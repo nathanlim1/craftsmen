@@ -15,6 +15,7 @@ RUNNING ON MINECRAFT 1.21.11 WITH MINESCRIPT 5.0b9
 * Minecraft **Java Edition**
 * Python **3.8+**
 * Modrinth App
+* Gemini API key (set as `GOOGLE_API_KEY`)
 
 ---
 
@@ -84,7 +85,17 @@ brew install python
 
 ---
 
-### 7. Configure Minescript
+### 7. Configure Gemini API Key
+
+Set your Gemini API key in the environment before running scripts:
+
+```bash
+export GOOGLE_API_KEY="your_key_here"
+```
+
+---
+
+### 8. Configure Minescript
 
 Open the instance folder in Modrinth and edit:
 
