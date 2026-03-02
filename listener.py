@@ -34,7 +34,7 @@ def get_inventory_dict():
         print(f"Error reading inventory: {e}")
     return inv_dict
 
-# Pre-1.13 or commonly hallucinated block IDs → correct modern equivalents.
+# Pre-1.13 block IDs → correct modern equivalents.
 _BLOCK_ID_ALIASES = {
     "minecraft:fence":            "minecraft:oak_fence",
     "minecraft:wooden_door":      "minecraft:oak_door",
@@ -57,6 +57,48 @@ _BLOCK_ID_ALIASES = {
 }
 
 
+# Blocks whose item form differs from their placed block ID.
+# give/clear must use the item name; setblock uses the block name.
+_BLOCK_TO_ITEM = {
+    "minecraft:wall_torch":            "minecraft:torch",
+    "minecraft:soul_wall_torch":       "minecraft:soul_torch",
+    "minecraft:redstone_wall_torch":   "minecraft:redstone_torch",
+    "minecraft:oak_wall_sign":         "minecraft:oak_sign",
+    "minecraft:spruce_wall_sign":      "minecraft:spruce_sign",
+    "minecraft:birch_wall_sign":       "minecraft:birch_sign",
+    "minecraft:jungle_wall_sign":      "minecraft:jungle_sign",
+    "minecraft:acacia_wall_sign":      "minecraft:acacia_sign",
+    "minecraft:dark_oak_wall_sign":    "minecraft:dark_oak_sign",
+    "minecraft:mangrove_wall_sign":    "minecraft:mangrove_sign",
+    "minecraft:cherry_wall_sign":      "minecraft:cherry_sign",
+    "minecraft:bamboo_wall_sign":      "minecraft:bamboo_sign",
+    "minecraft:crimson_wall_sign":     "minecraft:crimson_sign",
+    "minecraft:warped_wall_sign":      "minecraft:warped_sign",
+    "minecraft:white_wall_banner":     "minecraft:white_banner",
+    "minecraft:orange_wall_banner":    "minecraft:orange_banner",
+    "minecraft:magenta_wall_banner":   "minecraft:magenta_banner",
+    "minecraft:light_blue_wall_banner":"minecraft:light_blue_banner",
+    "minecraft:yellow_wall_banner":    "minecraft:yellow_banner",
+    "minecraft:lime_wall_banner":      "minecraft:lime_banner",
+    "minecraft:pink_wall_banner":      "minecraft:pink_banner",
+    "minecraft:gray_wall_banner":      "minecraft:gray_banner",
+    "minecraft:light_gray_wall_banner":"minecraft:light_gray_banner",
+    "minecraft:cyan_wall_banner":      "minecraft:cyan_banner",
+    "minecraft:purple_wall_banner":    "minecraft:purple_banner",
+    "minecraft:blue_wall_banner":      "minecraft:blue_banner",
+    "minecraft:brown_wall_banner":     "minecraft:brown_banner",
+    "minecraft:green_wall_banner":     "minecraft:green_banner",
+    "minecraft:red_wall_banner":       "minecraft:red_banner",
+    "minecraft:black_wall_banner":     "minecraft:black_banner",
+}
+
+
+def _block_to_item(block_id: str) -> str:
+    """Return the inventory item ID for a given placed block ID.
+    Most blocks share the same name; wall_torch, wall signs, wall banners etc. do not."""
+    return _BLOCK_TO_ITEM.get(block_id, block_id)
+
+
 def _normalize_block_id(block_type: str) -> str:
     """Map any known legacy or hallucinated block ID to its modern equivalent.
     Only the base name (before any '[' block state) is looked up."""
@@ -67,6 +109,19 @@ def _normalize_block_id(block_type: str) -> str:
     return _BLOCK_ID_ALIASES.get(block_type, block_type)
 
 
+def _sanitize_block_id(block_id: str) -> str:
+    """Strip malformed JSON characters that may bleed into a block ID string."""
+    if "[" not in block_id:
+        # No block states — take only the first whitespace-free token.
+        return block_id.split()[0].rstrip("}],{\"'")
+    base, rest = block_id.split("[", 1)
+    if "]" in rest:
+        states = rest.split("]", 1)[0]
+        return f"{base}[{states}]"
+    # Opening bracket but no closing one — malformed, drop the states entirely.
+    return base.rstrip("}],{\"'")
+
+
 def _place_block(x, y, z, full_block_name):
     """Place a single block, handling block states and auto-completing door pairs.
 
@@ -74,9 +129,12 @@ def _place_block(x, y, z, full_block_name):
     we strip block states for those while keeping them for setblock.
     Doors are two blocks tall: placing either half auto-places the companion half.
     """
-    full_block_name = _normalize_block_id(full_block_name)
-    # Item name for give/clear has no block state bracket.
-    item_name = full_block_name.split("[", 1)[0]
+    full_block_name = _sanitize_block_id(_normalize_block_id(full_block_name))
+    # Strip block states for give/clear (item commands don't accept them).
+    block_base = full_block_name.split("[", 1)[0]
+    # Some blocks have no inventory item (wall_torch, wall signs, etc.) —
+    # give/clear must use the corresponding item ID instead.
+    item_name = _block_to_item(block_base)
 
     minescript.execute(f"give @p {item_name} 1")
     minescript.execute(f"setblock {x} {y} {z} {full_block_name}")
@@ -170,28 +228,6 @@ def handle_command(cmd_data):
             minescript.execute(f"setblock {x} {y} {z} minecraft:air")
         return True
 
-    elif method == "place_ops":
-        ops = params[0]
-        for op in ops:
-            x, y, z = op["x"], op["y"], op["z"]
-            block_type = op["block"]
-            if block_type.startswith("minecraft:"):
-                simple_type = block_type.split(":")[1]
-            else:
-                simple_type = block_type
-            full_block_name = f"minecraft:{simple_type}"
-            minescript.execute(f"give @p {full_block_name} 1")
-            minescript.execute(f"setblock {x} {y} {z} {full_block_name}")
-            minescript.execute(f"clear @p {full_block_name} 1")
-        return True
-
-    elif method == "remove_ops":
-        ops = params[0]
-        for op in ops:
-            x, y, z = op["x"], op["y"], op["z"]
-            minescript.execute(f"setblock {x} {y} {z} minecraft:air")
-        return True
-
     elif method == "set_inventory":
         block_type, count = params
         minescript.execute(f"clear @p {block_type}")
@@ -218,14 +254,16 @@ def handle_command(cmd_data):
                 max_x, max_y, max_z = bounds_max_sc
                 cx = (min_x + max_x) / 2
                 cz = (min_z + max_z) / 2
-                width  = max(max_x - min_x, max_z - min_z)
-                # Stand ~1.5× the build width away on the +X/+Z diagonal, elevated
-                dist = max(width * 1.5, 15)
+                width = max(max_x - min_x, max_z - min_z)
+                # Place camera at +X/+Z diagonal, 1.5× the build width away (min 8).
+                dist = max(width * 1.5, 8)
                 vx = cx + dist
-                vy = max_y + max(width * 0.6, 10)
+                # Just 4 blocks above the roof — close enough for a clear view.
+                vy = max_y + 4
                 vz = cz + dist
-                # yaw=-135 faces back toward -X/-Z (toward the build centre)
-                minescript.execute(f"tp @p {vx:.1f} {vy:.1f} {vz:.1f} -135 -25")
+                # Yaw 135° = northwest in Minecraft, pointing from the +X/+Z corner
+                # back toward the build centre at (cx, cz). Pitch -20 = slight downward tilt.
+                minescript.execute(f"tp @p {vx:.1f} {vy:.1f} {vz:.1f} 135 -20")
                 time.sleep(0.5)  # Wait for the world to render from the new position.
 
             filename = label or f"craftsmen_{int(time.time())}.png"
@@ -327,7 +365,6 @@ def start_server():
         minescript.echo(f"Listener started on port {PORT}")
         
         while True:
-            # Check for stop signal? For now just run forever until script killed
             conn, addr = server.accept()
             # Only handle one client at a time for simplicity (prevents race conditions in game state)
             client_handler(conn, addr)

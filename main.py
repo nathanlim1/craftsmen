@@ -8,11 +8,11 @@ def main():
 
     pos = client.get_position()
     start = (int(pos[0]) + 2, int(pos[1]), int(pos[2]))
-    end = (start[0] + 25, start[1] + 25, start[2] + 25)
+    end = (start[0] + 10, start[1] + 10, start[2] + 10)
 
     print("Starting manager/subagent build...")
     builder.build(
-        prompt="Build a small wooden house (8x8 foundation)and make it look very nice.",
+        prompt="Build a small wooden house (5x5 foundation)and make it look very nice.",
         bounds_min=start,
         bounds_max=end,
     )

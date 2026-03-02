@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from minecraft_client import MinecraftClient
 from agent_manager import AgentManager
 from agent_subbuilder import SubBuilder
+from retrieval import get_initial_terrain
 
 
 load_dotenv()
@@ -22,14 +23,10 @@ class Builder:
         client: MinecraftClient,
         model: str = "gpt-5.1",
         max_blocks: int = 600,
-        max_retries: int = 2,
-        throttle_seconds: float = 0.05,
     ) -> None:
         self.client = client
         self.model = model
         self.max_blocks = max_blocks
-        self.max_retries = max_retries
-        self.throttle_seconds = throttle_seconds  # Time to wait between placing blocks for lag
         self._manager = AgentManager(model=self.model)
         self._subbuilder = SubBuilder(client=self.client, model=self.model)
 
@@ -42,18 +39,24 @@ class Builder:
     ) -> List[BlockOp]:
         bounds_min, bounds_max = self._normalize_bounds(bounds_min, bounds_max)
 
-        ledger_ops, summaries, chosen_palette = self._manager.run(
+        print("[Builder] Scanning initial terrain (one-time)...")
+        initial_terrain = get_initial_terrain(
+            self.client, bounds_min, bounds_max, padding=2
+        )
+        print(f"[Builder] Initial terrain: {len(initial_terrain)} non-air blocks cached.")
+
+        ledger_ops, chosen_palette = self._manager.run(
             prompt=prompt,
             bounds_min=bounds_min,
             bounds_max=bounds_max,
             palette=palette,
             max_blocks=self.max_blocks,
             subbuilder=self._subbuilder,
+            initial_terrain=initial_terrain,
         )
         if not chosen_palette:
             raise RuntimeError("Manager did not choose a palette.")
 
-        palette = self._normalize_palette(chosen_palette)
         plan_ops = [
             BlockOp(x=op["x"], y=op["y"], z=op["z"], block=op["block"])
             for op in ledger_ops
@@ -74,11 +77,3 @@ class Builder:
         max_z = max(bounds_min[2], bounds_max[2])
         return (min_x, min_y, min_z), (max_x, max_y, max_z)
 
-    def _normalize_palette(self, palette: List[str]) -> List[str]:
-        normalized = []
-        for block in palette:
-            block_id = block.strip().lower()
-            if not block_id.startswith("minecraft:"):
-                raise ValueError(f"Palette block must be minecraft:* id, got {block}")
-            normalized.append(block_id)
-        return normalized

@@ -37,9 +37,6 @@ class MinecraftClient:
             msg = json.dumps(payload) + "\n"
             self.socket.sendall(msg.encode('utf-8'))
             
-            # Read response (simple blocking read for newline)
-            # (uses the assumption that responses fit in one packet or come quickly)
-
             f = self.socket.makefile('r')
             response_line = f.readline()
             
@@ -101,6 +98,19 @@ class MinecraftClient:
     def set_inventory(self, block_type: str, count: int) -> None:
         """Sets the inventory count for a specific block type (Helper for testing)."""
         self._send_command("set_inventory", block_type, count)
+
+    def take_screenshot(
+        self,
+        label: str = None,
+        bounds_min: Tuple[int, int, int] = None,
+        bounds_max: Tuple[int, int, int] = None,
+    ) -> Dict[str, Any]:
+        """Triggers a Minecraft screenshot and returns {"path": "<file_path>"}.
+        If bounds_min and bounds_max are provided the player is teleported to a
+        fixed vantage point outside and above the build before capturing, so the
+        image always shows the full exterior."""
+        params = [label or "", bounds_min, bounds_max] if (bounds_min and bounds_max) else [label or ""]
+        return self._send_command("take_screenshot", *params)
 
     def close(self):
         if self.socket:
