@@ -14,7 +14,7 @@ import time
 from collections import Counter
 from typing import Dict, List, Tuple
 
-from builder import BlockOp
+from blocks import BlockOp
 
 
 # ── Minimal NBT binary writer ──────────────────────────────────────────────

@@ -1,7 +1,7 @@
 from collections import Counter
 from typing import Dict, List, Optional, Tuple
 
-from builder import BlockOp
+from blocks import BlockOp
 
 
 class WorldState:

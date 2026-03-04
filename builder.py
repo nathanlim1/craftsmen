@@ -1,5 +1,4 @@
 import os
-from dataclasses import dataclass
 from typing import List, Optional, Tuple, TypedDict
 from dotenv import load_dotenv
 from langgraph.graph import END, StateGraph
@@ -8,15 +7,11 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from pydantic import BaseModel, Field
 from minecraft_client import MinecraftClient
 
+from blocks import BlockOp
+from shapes import HighLevelPlan, compress_to_shapes, expand_plan
+
 
 load_dotenv()
-
-@dataclass
-class BlockOp:
-    x: int
-    y: int
-    z: int
-    block: str
 
 
 class BlockOpSchema(BaseModel):  # Structured response for LLM via langchain
@@ -39,6 +34,7 @@ class BuilderState(TypedDict, total=False):
     context_blocks: List[BlockOp]
     max_blocks: int
     attempts: int
+    high_level_plan: HighLevelPlan
     plan: List[BlockOp]
     error: Optional[str]
     last_error: Optional[str]
@@ -56,7 +52,7 @@ class Builder:
         self.model = model
         self.max_blocks = max_blocks
         self.max_retries = max_retries
-        self._structured_model = self._create_llm().with_structured_output(PlanSchema)
+        self._structured_model = self._create_llm().with_structured_output(HighLevelPlan)
         self._graph = self._build_graph()
 
     def _create_llm(self):
@@ -123,9 +119,11 @@ class Builder:
     def _build_graph(self):
         graph = StateGraph(BuilderState)
         graph.add_node("draft_plan", self._draft_plan)
+        graph.add_node("expand_plan", self._expand_plan)
         graph.add_node("validate_plan", self._validate_plan_node)
         graph.set_entry_point("draft_plan")
-        graph.add_edge("draft_plan", "validate_plan")
+        graph.add_edge("draft_plan", "expand_plan")
+        graph.add_edge("expand_plan", "validate_plan")
         graph.add_conditional_edges(
             "validate_plan",
             self._route_after_validate,
@@ -145,11 +143,12 @@ class Builder:
         )
 
         try:
-            plan = self._call_llm_for_plan(system_text, user_text)
+            high_level_plan = self._call_llm_for_plan(system_text, user_text)
         except Exception as exc:
             error = self._format_llm_error(exc)
             return {
                 "attempts": attempts,
+                "high_level_plan": None,
                 "plan": [],
                 "error": error,
                 "last_error": error,
@@ -157,21 +156,29 @@ class Builder:
 
         return {
             "attempts": attempts,
-            "plan": plan,
+            "high_level_plan": high_level_plan,
             "error": None,
             "last_error": None,
         }
 
-    def _call_llm_for_plan(self, system_text: str, user_text: str) -> List[BlockOp]:
+    def _call_llm_for_plan(self, system_text: str, user_text: str) -> HighLevelPlan:
         messages = [
             SystemMessage(content=system_text),
             HumanMessage(content=user_text),
         ]
-        response: PlanSchema = self._structured_model.invoke(messages)
-        return [
-            BlockOp(x=op.x, y=op.y, z=op.z, block=op.block)
-            for op in response.ops
-        ]
+        return self._structured_model.invoke(messages)
+
+    def _expand_plan(self, state: BuilderState) -> BuilderState:
+        """Expand HighLevelPlan to BlockOps. Skip if there was an error."""
+        if state.get("error"):
+            return state
+        high_level_plan = state.get("high_level_plan")
+        if high_level_plan is None:
+            return {"plan": []}
+        bounds_min = state["bounds_min"]
+        bounds_max = state["bounds_max"]
+        plan = expand_plan(high_level_plan, bounds_min, bounds_max)
+        return {"plan": plan}
 
     def _format_llm_error(self, exc: Exception) -> str:
         message = str(exc)
@@ -230,11 +237,17 @@ class Builder:
         width, height, length = size
         palette_text = ", ".join(palette)
         system_text = (
-            "You are a Minecraft build planner. "
-            "Return only a structured plan that matches the schema: "
-            "ops: list of { x:int, y:int, z:int, block:string }. "
-            "Respect bounds, palette, and max block constraints. "
-            "You may place minecraft:air to leave a position empty or clear an existing block."
+            "You are a Minecraft build planner. Output a HighLevelPlan using shape operations:\n"
+            "- wall: vertical rectangular plane. corner1 and corner2 are opposite corners. "
+            "One horizontal axis (x or z) must be equal in both corners.\n"
+            "- floor: horizontal plane at constant y.\n"
+            "- line: 1D run of blocks. Exactly one axis differs between corner1 and corner2.\n"
+            "- fill: solid 3D box.\n"
+            "To create any opening (gap, hole, archway, etc.), add a shape of the same type using "
+            "block \"minecraft:air\" after the solid shape — it overwrites the solid blocks. "
+            "For example: a wall of oak planks followed by a wall of air for the hole location.\n"
+            "Prefer fewer, larger shapes. For a 5x3 wall, use one wall op, not 15 individual ops.\n"
+            "Respect bounds, palette, and max block constraints."
         )
         error_hint = f"\nPrevious error: {last_error}" if last_error else ""
 
@@ -259,15 +272,16 @@ class Builder:
 
     @staticmethod
     def _format_context_blocks(blocks: List[BlockOp]) -> str:
-        """Compact representation of context blocks grouped by type."""
-        from collections import defaultdict
-        grouped: dict = defaultdict(list)
-        for op in blocks:
-            grouped[op.block].append(f"({op.x},{op.y},{op.z})")
+        """Compact representation of context blocks as high-level shapes."""
+        block_dict = {(op.x, op.y, op.z): op.block for op in blocks}
+        shapes = compress_to_shapes(block_dict)
         lines = []
-        for block, coords in sorted(grouped.items()):
-            lines.append(f"{block}: {', '.join(coords)}")
-        return "\n".join(lines)
+        for s in shapes:
+            c1, c2 = s.corner1, s.corner2
+            lines.append(
+                f"{s.type} {s.block}: corner1=({c1.x},{c1.y},{c1.z}) corner2=({c2.x},{c2.y},{c2.z})"
+            )
+        return "\n".join(lines) if lines else "(no blocks)"
 
     def _validate_plan(
         self,

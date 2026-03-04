@@ -53,7 +53,6 @@ def main():
     print(f"Prompt  : {prompt}")
     print(f"Origin  : {origin}")
     print(f"Size    : {DEFAULT_SIZE}")
-    print(f"Palette : {len(DEFAULT_PALETTE)} block types")
     print(f"Scaffold: {SCAFFOLD_BLOCK}")
 
     # --- 1. Manager decomposes and delegates to sub-builders ----------------
@@ -63,7 +62,6 @@ def main():
         prompt=prompt,
         bounds_min=origin,
         bounds_max=end,
-        overall_palette=DEFAULT_PALETTE,
     )
     print(f"  -> {world_state.block_count} total blocks placed across all sub-builders")
 

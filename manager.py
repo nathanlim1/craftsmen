@@ -8,7 +8,8 @@ from langchain_openai import AzureChatOpenAI, ChatOpenAI
 from langgraph.prebuilt import create_react_agent
 from pydantic import BaseModel, Field
 
-from builder import BlockOp, Builder
+from blocks import BlockOp
+from builder import Builder
 from minecraft_client import MinecraftClient
 from world_state import WorldState
 
@@ -23,15 +24,14 @@ You operate within an overall build volume of size {width} x {height} x {length}
 All coordinates are relative to the build origin: x ranges from 0 to {max_x},
 y (vertical) from 0 to {max_y}, z from 0 to {max_z}.
 
-Available palette for the entire build: {palette}
-
 For each sub-task, you call the delegate_build tool with:
 - query: a clear, detailed description of what to build
 - zone_min, zone_max: the construction zone where the sub-builder can place blocks
   (inclusive, relative to overall origin)
 - context_min, context_max: a bounding box of existing blocks the sub-builder can see
   for reference (should be >= the construction zone)
-- palette: a subset (or all) of the available palette appropriate for this sub-task
+- palette: a list of minecraft: block IDs the sub-builder may use for this task.
+  Choose block IDs entirely at your discretion based on what fits the task.
 
 Guidelines:
 - Prefer FEWER, LARGER delegations. Bundle entire structural shells in single calls:
@@ -85,8 +85,8 @@ class DelegateBuildInput(BaseModel):
     )
     palette: List[str] = Field(
         description=(
-            "List of minecraft: block IDs the sub-builder may use "
-            "(e.g. ['minecraft:oak_planks', 'minecraft:glass'])."
+            "List of minecraft: block IDs the sub-builder may use for this task "
+            "(e.g. ['minecraft:oak_planks', 'minecraft:glass']). Choose at your discretion."
         )
     )
 
@@ -139,7 +139,6 @@ class Manager:
         prompt: str,
         bounds_min: Tuple[int, int, int],
         bounds_max: Tuple[int, int, int],
-        overall_palette: List[str],
     ) -> WorldState:
         """Decompose *prompt* into sub-tasks and build via delegated sub-builders.
 
@@ -280,7 +279,6 @@ class Manager:
             max_x=width - 1,
             max_y=height - 1,
             max_z=length - 1,
-            palette=", ".join(overall_palette),
             max_delegations=max_delegations,
         )
 
