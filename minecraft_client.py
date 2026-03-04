@@ -1,7 +1,7 @@
 import sys
 import socket
 import json
-from typing import Tuple, Dict, Any
+from typing import Tuple, Dict, Any, Optional
 
 class MinecraftClient:
     """
@@ -11,12 +11,14 @@ class MinecraftClient:
         self.host = host
         self.port = port
         self.socket = None
+        self._rfile = None
         self.connect()
 
     def connect(self):
         try:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket.connect((self.host, self.port))
+            self._rfile = self.socket.makefile('r')
             # Test connection
             if self._send_command("ping") != "pong":
                 raise ConnectionError("Handshake failed")
@@ -37,11 +39,8 @@ class MinecraftClient:
             msg = json.dumps(payload) + "\n"
             self.socket.sendall(msg.encode('utf-8'))
             
-            # Read response (simple blocking read for newline)
-            # (uses the assumption that responses fit in one packet or come quickly)
-
-            f = self.socket.makefile('r')
-            response_line = f.readline()
+            # Read response (blocking read for newline-delimited JSON)
+            response_line = self._rfile.readline()
             
             if not response_line:
                 raise ConnectionError("Server closed connection")
@@ -86,6 +85,33 @@ class MinecraftClient:
         """Sets the inventory count for a specific block type (Helper for testing)."""
         self._send_command("set_inventory", block_type, count)
 
+    def build_schematic(
+        self,
+        filename: str,
+        x: int,
+        y: int,
+        z: int,
+        scaffold_block: str = "minecraft:red_wool",
+    ) -> Dict[str, Any]:
+        """
+        Tell the listener to start Baritone ``#build`` with the given schematic.
+
+        The ``.schem`` file must already exist in the Minecraft schematics
+        directory.  Baritone will pathfind, scaffold with *scaffold_block*,
+        and place blocks from the player's inventory (survival-friendly).
+
+        Returns immediately — Baritone continues building in-game.
+        """
+        return self._send_command(
+            "build_schematic", filename, x, y, z, scaffold_block
+        )
+
+    def baritone(self, command: str) -> Dict[str, Any]:
+        """Send a raw Baritone command (e.g. 'stop', 'goto 0 64 0')."""
+        return self._send_command("baritone", command)
+
     def close(self):
+        if self._rfile:
+            self._rfile.close()
         if self.socket:
             self.socket.close()

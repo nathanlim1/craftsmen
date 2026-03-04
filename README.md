@@ -1,165 +1,193 @@
-# craftsmen
-A multi-agent AI system for natural-language based construction in Minecraft.
+# 🏗️ Craftsmen
 
-RUNNING ON MINECRAFT 1.21.11 WITH MINESCRIPT 5.0b9
+An AI-powered Minecraft builder that turns natural language prompts into real in-game structures — built and placed in **survival mode** by [Baritone](https://github.com/cabaletta/baritone).
 
+> *"Build a small oak cabin"* → LLM generates a block plan → saved as a `.schem` schematic → Baritone pathfinds, scaffolds, and places every block from your inventory.
 
+---
 
+## How It Works
 
-# Setup Guide
+```
+┌──────────────┐       ┌──────────────┐       ┌──────────────────┐
+│  main.py     │──────▶│  builder.py  │──────▶│  schematic.py    │
+│  Orchestrator│       │  LLM Planner │       │  .schem Writer   │
+└──────┬───────┘       └──────────────┘       └────────┬─────────┘
+       │                                               │
+       │  socket (JSON-RPC)                            │  file write
+       ▼                                               ▼
+┌──────────────┐                              %APPDATA%/.../schematics/
+│ listener.py  │                              craftsmen_<prompt>_<ts>.schem
+│ (MineScript) │
+│  Baritone    │
+│  #build cmd  │
+└──────────────┘
+```
+
+1. **`main.py`** — Takes a build prompt (CLI arg or interactive), connects to the in-game listener, and orchestrates the pipeline.
+2. **`builder.py`** — Uses Azure OpenAI (via LangGraph) to generate a validated list of block placements within a bounded volume.
+3. **`schematic.py`** — Converts the block plan into a **Sponge Schematic v2** (`.schem`) file with a self-contained NBT writer. No external dependencies. Blacklisted blocks (doors, beds, tall plants, etc.) are automatically stripped.
+4. **`minecraft_client.py`** — Socket client that talks to the in-game listener over `localhost:25560`.
+5. **`listener.py`** — Runs **inside Minecraft** via MineScript. Configures Baritone (scaffold block, permissions) and issues `#build <file> <x> <y> <z>`.
+
+### Scaffold Block
+
+Baritone is configured to use **`minecraft:red_wool`** as its throwaway scaffold material for bridging and pillaring. The bright colour makes it easy to spot and tear down after the build completes.
+
 ---
 
 ## Requirements
 
-* macOS
-* Minecraft **Java Edition**
-* Python **3.8+**
-* Modrinth App
+| Dependency | Version |
+|---|---|
+| Minecraft Java Edition | 1.21.1 |
+| MineScript | 5.0b9 (Fabric) |
+| Baritone | Fabric build matching MC version |
+| Python | 3.10+ |
+| Modrinth App | Latest |
 
----
-
-## Setup Guide
-
-### 1. Install Minecraft Java Edition
-
-Download and install Minecraft from:
-[https://www.minecraft.net](https://www.minecraft.net)
-
-Launch it once to confirm it works, then quit.
-
----
-
-### 2. Install Modrinth
-
-Download and install the Modrinth App:
-[https://modrinth.com/app](https://modrinth.com/app)
-
-Sign in with your Minecraft account if prompted.
-
----
-
-### 3. Create a Fabric Instance
-
-1. In Modrinth, click **Create Instance**
-2. Choose **Create from scratch**
-3. Configure:
-
-   * **Game Version**: 1.21.11
-   * **Mod Loader**: **Fabric**
-4. Create the instance
-
----
-
-### 4. Install Minescript
-
-1. Open the instance
-2. Go to the **Mods** tab
-3. Install **Minescript**, version 5.0b9 w/ Fabric
-4. Install **Fabric API** if prompted (required)
-
----
-
-### 5. First Launch
-
-Launch the instance once and reach the main menu, then quit.
-This initializes the `minescript/` directory and config files.
-
----
-
-### 6. Install Python
-
-Verify Python is installed:
+### Python Packages
 
 ```bash
-which python3
-python3 --version
+pip install -r requirements.txt
 ```
 
-Python 3.8+ is required.
-If needed:
-
-```bash
-brew install python
-```
+Contents: `langgraph`, `openai`, `python-dotenv`, `langchain`, `langchain-openai`, `pydantic`
 
 ---
 
-### 7. Configure Minescript
+## Setup
 
-Open the instance folder in Modrinth and edit:
+### 1. Modrinth + Fabric Instance
 
-```
-minescript/config.txt
-```
+1. Install the [Modrinth App](https://modrinth.com/app) and sign in.
+2. **Create Instance** → Create from scratch → Game version **1.21.1**, Loader **Fabric**.
 
-Example configuration:
+### 2. Install Mods
 
-```txt
-# Lines starting with "#" are ignored.
+In the instance's **Mods** tab, install:
 
-python="/usr/bin/python3"
-command_path=".:/Users/natha/Projects/craftsmen"
+- **MineScript** 5.0b9
+- **Fabric API** (if prompted)
+- **Baritone** — download the `baritone-standalone-fabric-*.jar` from [releases](https://github.com/cabaletta/baritone/releases) and drop it into the instance's `mods/` folder.
 
-# Automatically start the listener when entering any world
+> **Verify Baritone:** Join a test world and type `#help` in chat. If it responds, you're good.
+
+### 3. Configure MineScript
+
+Open the instance folder and edit `minescript/config.txt`:
+
+```ini
+python="C:/Users/<you>/AppData/Local/Python/pythoncore-3.14-64/python.exe"
+command_path=".;C:/Users/<you>/OneDrive/Documents/School/craftsmen"
 autorun[*]=listener
 ```
 
-#### Notes
+| Setting | Notes |
+|---|---|
+| `python` | Full path to your Python executable. If MineScript job `listener` fails with error `9009`, this path is wrong. |
+| `command_path` | Semicolon-separated on Windows, colon-separated on macOS. `.` keeps MineScript's own scripts visible. |
+| `autorun[*]=listener` | Starts `listener.py` automatically when entering any world. |
 
-* On macOS, `command_path` entries are separated by `:`
-* `.` ensures Minescript still searches the instance’s own directory
-* `listener` refers to `listener.py` in this repository
+### 4. Azure OpenAI
+
+Create a `.env` file in the project root:
+
+```env
+AZURE_OPENAI_ENDPOINT="https://<resource>.openai.azure.com/"
+AZURE_OPENAI_DEPLOYMENT="<deployment-name>"
+AZURE_OPENAI_API_VERSION="YYYY-MM-DD"
+AZURE_OPENAI_API_KEY="<key>"
+```
+
+`AZURE_SUBSCRIPTION_KEY` is accepted as a fallback for the API key.
+
+### 5. First Launch
+
+Launch the Modrinth instance, enter a world, and confirm you see:
+
+```
+[Craftsmen] Listener started on port 25560
+```
+
+in the in-game chat. Open to LAN (`Pause → Open to LAN → Start`) to prevent the world from pausing when you alt-tab.
 
 ---
 
-## Running Scripts
+## Usage
 
-From inside a Minecraft world, run any script in this project using chat:
+```bash
+# Interactive prompt
+python main.py
 
-```
-\script_name
-```
-
-Examples:
-
-```
-\listener
-\hello
+# Or pass the prompt directly
+python main.py Build a small oak watchtower
 ```
 
-With `autorun[*]=listener`, the listener starts automatically when entering a world.
+The program will:
+
+1. **Generate** a block plan via the LLM
+2. **Save** a uniquely-named `.schem` file (e.g. `craftsmen_Build_a_small_oak_watcht_20260303_153012.schem`)
+3. **Print** a materials list — make sure these items are in your inventory
+4. **Send** `#build` to Baritone, which pathfinds and places blocks in survival
+
+### Materials
+
+Before Baritone starts building, the console prints the exact items and quantities needed:
+
+```
+Materials needed in inventory:
+  minecraft:cobblestone: 12
+  minecraft:oak_log: 8
+  minecraft:oak_planks: 45
+  minecraft:torch: 4
+```
+
+Stock your inventory with these items. If Baritone runs out of a material mid-build, it will pause — add more items and type `#build` in chat to resume.
+
+### In-Game Controls
+
+| Chat Command | Effect |
+|---|---|
+| `#stop` | Pause / cancel the current build |
+| `#build` | Resume a paused build |
+| `\jobs` | List running MineScript scripts |
+| `\killjob <id>` | Stop a MineScript script |
 
 ---
 
-## Long-Running Scripts
-
-Minescript manages scripts as jobs:
+## Project Structure
 
 ```
-\jobs        # list running scripts
-\killjob ID  # stop a script
+craftsmen/
+├── main.py              # CLI entry point & orchestration
+├── builder.py           # LangGraph + Azure OpenAI plan generation
+├── schematic.py         # Sponge Schematic v2 writer (zero dependencies)
+├── minecraft_client.py  # Socket client for listener communication
+├── listener.py          # MineScript in-game server (Baritone bridge)
+├── requirements.txt     # Python dependencies
+└── .env                 # Azure OpenAI credentials (not committed)
 ```
-
-* Leaving the world or closing Minecraft automatically terminates all running scripts.
-* Re-entering the world restarts any `autorun` scripts.
 
 ---
 
-## World Pausing (Important)
+## Blacklisted Blocks
 
-In singleplayer, Minecraft **pauses the world when the game menu is open**.
+Certain multi-part or state-dependent blocks can't be reliably placed by Baritone's `#build`. These are automatically stripped from schematics:
 
-When paused:
+| Category | Examples |
+|---|---|
+| Doors | `oak_door`, `iron_door`, all wood types |
+| Beds | All 16 colours |
+| Tall plants | `tall_grass`, `sunflower`, `rose_bush`, `lilac`, `peony` |
+| Banners | `white_banner`, `black_banner` |
 
-* Minescript commands may execute
-* Block placement and world updates will not register until unpaused
+The LLM palette in `main.py` already excludes these, but the schematic writer has a safety-net filter in case they appear.
 
-### Recommendation
+---
 
-Open the world to LAN:
+## Singleplayer Pause Warning
 
-```
-Pause Menu → Open to LAN → Start LAN World
-```
+In singleplayer, Minecraft **freezes the world** when the game menu is open. Block placement and Baritone pathing will stall until you unpause.
 
-This keeps the world ticking and prevents delayed block placement during development.
+**Fix:** Open to LAN once per session (`Pause → Open to LAN → Start`). This keeps the world ticking while you work in your terminal.
