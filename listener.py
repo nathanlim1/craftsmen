@@ -33,6 +33,18 @@ def _player_position():
     return minescript.player_position()
 
 
+def _is_creative():
+    """Return True if the local player is in creative mode (minescript player NBT)."""
+    minescript.echo("Checking if player is in creative mode...")
+    try:
+        player = minescript.player(nbt=True)
+        nbt = player.nbt or ""
+        # Creative mode shows as instabuild:1b in abilities
+        return "instabuild:1b" in nbt
+    except Exception:
+        return False
+
+
 def _distance(a, b):
     return math.sqrt(sum((ai - bi) ** 2 for ai, bi in zip(a, b)))
 
@@ -135,6 +147,23 @@ def handle_command(cmd_data):
             block = f"minecraft:{block}"
         minescript.execute(f"/give @s {block} {int(params[1])}")
         return True
+
+    if method == "ensure_materials_if_creative":
+        materials = params[0] if params else {}
+        scaffold_block = str(params[1]) if len(params) > 1 else SCAFFOLD_BLOCK
+        if not _is_creative():
+            return {"creative": False, "gave": False}
+        # Creative mode: only 1 of each block type needed (infinite supply)
+        for block in materials:
+            if not block.startswith("minecraft:"):
+                block = f"minecraft:{block}"
+            minescript.execute(f"/give @s {block} 1")
+            time.sleep(0.05)
+        if scaffold_block:
+            if not scaffold_block.startswith("minecraft:"):
+                scaffold_block = f"minecraft:{scaffold_block}"
+            minescript.execute(f"/give @s {scaffold_block} 1")
+        return {"creative": True, "gave": True}
 
     if method == "get_inventory":
         return {}

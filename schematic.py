@@ -9,6 +9,7 @@ import gzip
 import io
 import os
 import struct
+import sys
 import time
 from collections import Counter
 from typing import Dict, List, Tuple
@@ -274,8 +275,9 @@ def save_schem(
         size:  (width, height, length).
         filename:  Name of the schematic file.  If *None*, a unique
                    timestamped name is generated.
-        schematics_dir:  Override path.  Defaults to
-                         ``%APPDATA%/ModrinthApp/profiles/Craftsmen/schematics``.
+        schematics_dir:  Override path.  Defaults to platform-specific:
+                         Windows ``%APPDATA%``, macOS ``~/Library/Application Support``,
+                         Linux ``~/.local/share``, then ``.../ModrinthApp/profiles/Craftsmen/schematics``.
         data_version:  Minecraft data version.
 
     Returns:
@@ -285,8 +287,13 @@ def save_schem(
         filename = make_schem_name()
 
     if schematics_dir is None:
-        appdata = os.getenv("APPDATA", "")
-        schematics_dir = os.path.join(appdata, "ModrinthApp", "profiles", "Craftsmen", "schematics")
+        if sys.platform == "win32":
+            base = os.getenv("APPDATA", "")
+        elif sys.platform == "darwin":
+            base = os.path.expanduser("~/Library/Application Support")
+        else:
+            base = os.path.expanduser("~/.local/share")
+        schematics_dir = os.path.join(base, "ModrinthApp", "profiles", "Craftsmen", "schematics")
 
     os.makedirs(schematics_dir, exist_ok=True)
     path = os.path.join(schematics_dir, filename)

@@ -67,8 +67,16 @@ def main():
     for block, count in sorted(materials.items()):
         print(f"    {block}: {count}")
 
+    # --- Creative mode: auto-give materials ----------------------------------
+    result = client.ensure_materials_if_creative(materials, SCAFFOLD_BLOCK)
+    if result.get("gave"):
+        print("  -> Creative mode: materials + scaffold added to inventory")
+
     # --- 3. Tell Baritone to #build -----------------------------------------
-    print("\n[3/3] Starting Baritone #build (survival mode) ...")
+
+        print("\n[3/3] Starting Baritone #build (creative mode) ...")
+    else:
+        print("\n[3/3] Starting Baritone #build (survival mode) ...")
     result = client.build_schematic(
         filename=schem_name,
         x=origin[0],
