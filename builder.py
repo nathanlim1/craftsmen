@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from typing import List, Optional, Tuple, TypedDict
 from dotenv import load_dotenv
 from langgraph.graph import END, StateGraph
-from langchain_openai import AzureChatOpenAI
+from langchain_openai import AzureChatOpenAI, ChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage
 from pydantic import BaseModel, Field
 from minecraft_client import MinecraftClient
@@ -59,12 +59,27 @@ class Builder:
         self._graph = self._build_graph()
 
     def _create_llm(self):
-        return AzureChatOpenAI(
-                azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-                azure_deployment=os.getenv("AZURE_OPENAI_DEPLOYMENT"),
+        azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
+        azure_deployment = os.getenv("AZURE_OPENAI_DEPLOYMENT")
+        azure_api_key = os.getenv("AZURE_OPENAI_API_KEY") or os.getenv("AZURE_SUBSCRIPTION_KEY")
+
+        if azure_endpoint and azure_deployment and azure_api_key:
+            return AzureChatOpenAI(
+                azure_endpoint=azure_endpoint,
+                azure_deployment=azure_deployment,
                 api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
-                api_key=os.getenv("AZURE_OPENAI_API_KEY") or os.getenv("AZURE_SUBSCRIPTION_KEY"),
+                api_key=azure_api_key,
             )
+
+        openai_key = os.getenv("OPENAI_API_KEY")
+        if openai_key:
+            return ChatOpenAI(model=self.model, api_key=openai_key)
+
+        raise ValueError(
+            "No LLM configured. Set either Azure OpenAI env vars "
+            "(AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_DEPLOYMENT, AZURE_OPENAI_API_KEY) "
+            "or OPENAI_API_KEY."
+        )
 
     def build(
         self,
