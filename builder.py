@@ -1,9 +1,9 @@
-import time
+import os
 from dataclasses import dataclass
 from typing import List, Optional, Tuple, TypedDict
 from dotenv import load_dotenv
 from langgraph.graph import END, StateGraph
-from langchain_openai import ChatOpenAI
+from langchain_openai import AzureChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage
 from pydantic import BaseModel, Field
 from minecraft_client import MinecraftClient
@@ -50,15 +50,21 @@ class Builder:
         model: str = "gpt-5.1",
         max_blocks: int = 600,
         max_retries: int = 2,
-        throttle_seconds: float = 0.05,
     ) -> None:
         self.client = client
         self.model = model
         self.max_blocks = max_blocks
         self.max_retries = max_retries
-        self.throttle_seconds = throttle_seconds  # Time to wait between placing blocks for lag
-        self._structured_model = ChatOpenAI(model=self.model).with_structured_output(PlanSchema)
+        self._structured_model = self._create_llm().with_structured_output(PlanSchema)
         self._graph = self._build_graph()
+
+    def _create_llm(self):
+        return AzureChatOpenAI(
+                azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+                azure_deployment=os.getenv("AZURE_OPENAI_DEPLOYMENT"),
+                api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
+                api_key=os.getenv("AZURE_OPENAI_API_KEY") or os.getenv("AZURE_SUBSCRIPTION_KEY"),
+            )
 
     def build(
         self,
@@ -92,8 +98,9 @@ class Builder:
         if plan is None:
             raise RuntimeError("No plan returned from builder.")
 
-        self._execute_plan(plan, bounds_min, move_agent=move_agent, verify=verify)
-        return plan
+        _ = move_agent
+        _ = verify
+        return self._order_plan(plan)
 
     def _build_graph(self):
         graph = StateGraph(BuilderState)
@@ -121,7 +128,7 @@ class Builder:
         try:
             plan = self._call_llm_for_plan(system_text, user_text)
         except Exception as exc:
-            error = f"Structured output failed: {exc}"
+            error = self._format_llm_error(exc)
             return {
                 "attempts": attempts,
                 "plan": [],
@@ -146,6 +153,24 @@ class Builder:
             BlockOp(x=op.x, y=op.y, z=op.z, block=op.block)
             for op in response.ops
         ]
+
+    def _format_llm_error(self, exc: Exception) -> str:
+        message = str(exc)
+        lowered = message.lower()
+
+        if "404" in lowered and "resource not found" in lowered:
+            endpoint = os.getenv("AZURE_OPENAI_ENDPOINT") or "<missing>"
+            deployment = os.getenv("AZURE_OPENAI_DEPLOYMENT") or "<missing>"
+            api_version = os.getenv("AZURE_OPENAI_API_VERSION") or "<missing>"
+            return (
+                "Structured output failed: Azure returned 404 Resource not found. "
+                "Check that your deployment exists and matches the exact deployment name, "
+                "and that endpoint/api version are from the same Azure OpenAI resource. "
+                f"Current config: endpoint={endpoint}, deployment={deployment}, api_version={api_version}. "
+                "For Azure, endpoint should look like https://<resource>.openai.azure.com/"
+            )
+
+        return f"Structured output failed: {exc}"
 
     def _validate_plan_node(self, state: BuilderState) -> BuilderState:
         if state.get("error"):
@@ -221,31 +246,34 @@ class Builder:
 
         return None
 
-    def _execute_plan(
-        self,
-        plan: List[BlockOp],
-        bounds_min: Tuple[int, int, int],
-        move_agent: bool,
-        verify: bool,
-    ) -> None:
-        base_x, base_y, base_z = bounds_min
-        for op in plan:
-            x = base_x + op.x
-            y = base_y + op.y
-            z = base_z + op.z
-            if move_agent:
-                self.client.move_to(x, y + 2, z)
-                time.sleep(self.throttle_seconds)
-            success = self.client.place_block(x, y, z, op.block)
-            if not success:
-                raise RuntimeError(f"Failed to place {op.block} at ({x},{y},{z}).")
-            if verify:
-                found = self.client.get_block_at(x, y, z)
-                if found not in (op.block, f"minecraft:{op.block}"):
-                    raise RuntimeError(
-                        f"Verification failed at ({x},{y},{z}). Expected {op.block}, found {found}."
-                    )
-            time.sleep(self.throttle_seconds)
+    def _order_plan(self, plan: List[BlockOp]) -> List[BlockOp]:
+        return sorted(plan, key=self._plan_order_key)
+
+    def _plan_order_key(self, op: BlockOp):
+        return (
+            op.y,
+            op.z,
+            op.x,
+        )
+
+    @staticmethod
+    def to_world_coords(
+        plan: List[BlockOp], origin: Tuple[int, int, int]
+    ) -> List[BlockOp]:
+        """Translate relative plan coordinates to absolute world coordinates."""
+        ox, oy, oz = origin
+        return [
+            BlockOp(x=op.x + ox, y=op.y + oy, z=op.z + oz, block=op.block)
+            for op in plan
+        ]
+
+    @staticmethod
+    def plan_to_dicts(plan: List[BlockOp]) -> list:
+        """Serialize a list of BlockOps to plain dicts for the wire protocol."""
+        return [
+            {"x": op.x, "y": op.y, "z": op.z, "block": op.block}
+            for op in plan
+        ]
 
     def _normalize_bounds(
         self,
@@ -282,26 +310,37 @@ class Builder:
 
 
 if __name__ == "__main__":
-    # Example usage
+    from schematic import save_schem, material_list
+
     client = MinecraftClient()
     pos = client.get_position()
-    start = (int(pos[0]) + 2, int(pos[1]), int(pos[2]))
-    end = (start[0] + 6, start[1] + 4, start[2] + 6)
+    origin = (int(pos[0]) + 3, int(pos[1]), int(pos[2]))
+    end = (origin[0] + 4, origin[1] + 4, origin[2] + 4)
     palette = [
         "minecraft:oak_planks",
         "minecraft:oak_log",
-        "minecraft:cobblestone",
         "minecraft:glass",
         "minecraft:oak_stairs",
         "minecraft:oak_slab",
         "minecraft:oak_door",
     ]
     builder = Builder(client)
-    builder.build(
-        prompt="Build a small wooden hut with a door and windows.",
-        bounds_min=start,
+    plan = builder.build(
+        prompt="Build a small and simple garden",
+        bounds_min=origin,
         bounds_max=end,
         palette=palette,
-        move_agent=True,
-        verify=False,
     )
+    print(f"Plan: {len(plan)} block operations")
+
+    # Materials check
+    for block, count in sorted(material_list(plan).items()):
+        print(f"  {block}: {count}")
+
+    # Save schematic and start Baritone #build
+    size = (5, 5, 5)
+    schem_path, schem_name = save_schem(plan, size)
+    print(f"Schematic saved to {schem_path}")
+    result = client.build_schematic(schem_name, *origin)
+    print(f"Result: {result}")
+    client.close()
