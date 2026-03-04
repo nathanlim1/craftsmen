@@ -36,6 +36,7 @@ class BuilderState(TypedDict, total=False):
     bounds_max: Tuple[int, int, int]
     size: Tuple[int, int, int]
     palette: List[str]
+    context_blocks: List[BlockOp]
     max_blocks: int
     attempts: int
     plan: List[BlockOp]
@@ -87,6 +88,7 @@ class Builder:
         bounds_min: Tuple[int, int, int],
         bounds_max: Tuple[int, int, int],
         palette: List[str],
+        context_blocks: Optional[List[BlockOp]] = None,
         move_agent: bool = True,
         verify: bool = False,
     ) -> List[BlockOp]:
@@ -100,6 +102,7 @@ class Builder:
             "bounds_max": bounds_max,
             "size": size,
             "palette": palette,
+            "context_blocks": context_blocks or [],
             "max_blocks": self.max_blocks,
             "attempts": 0,
             "error": None,
@@ -138,6 +141,7 @@ class Builder:
             palette=state["palette"],
             max_blocks=state["max_blocks"],
             last_error=state.get("last_error"),
+            context_blocks=state.get("context_blocks", []),
         )
 
         try:
@@ -221,6 +225,7 @@ class Builder:
         palette: List[str],
         max_blocks: int,
         last_error: Optional[str],
+        context_blocks: Optional[List[BlockOp]] = None,
     ) -> Tuple[str, str]:
         width, height, length = size
         palette_text = ", ".join(palette)
@@ -228,9 +233,19 @@ class Builder:
             "You are a Minecraft build planner. "
             "Return only a structured plan that matches the schema: "
             "ops: list of { x:int, y:int, z:int, block:string }. "
-            "Respect bounds, palette, and max block constraints."
+            "Respect bounds, palette, and max block constraints. "
+            "You may place minecraft:air to leave a position empty or clear an existing block."
         )
         error_hint = f"\nPrevious error: {last_error}" if last_error else ""
+
+        context_section = ""
+        if context_blocks:
+            context_section = (
+                "\n\nExisting blocks in your visible context (read-only reference, "
+                "you may only place blocks within your construction zone above):\n"
+                + self._format_context_blocks(context_blocks)
+            )
+
         user_text = (
             f"Build request: {prompt}\n"
             f"Bounds size (relative): width={width}, height={height}, length={length}\n"
@@ -238,8 +253,21 @@ class Builder:
             f"Palette: {palette_text}\n"
             f"Max blocks: {max_blocks}\n"
             f"{error_hint}"
+            f"{context_section}"
         )
         return system_text, user_text
+
+    @staticmethod
+    def _format_context_blocks(blocks: List[BlockOp]) -> str:
+        """Compact representation of context blocks grouped by type."""
+        from collections import defaultdict
+        grouped: dict = defaultdict(list)
+        for op in blocks:
+            grouped[op.block].append(f"({op.x},{op.y},{op.z})")
+        lines = []
+        for block, coords in sorted(grouped.items()):
+            lines.append(f"{block}: {', '.join(coords)}")
+        return "\n".join(lines)
 
     def _validate_plan(
         self,
@@ -253,6 +281,7 @@ class Builder:
 
         width, height, length = size
         palette_set = set(palette)
+        palette_set.add("minecraft:air")
         for idx, op in enumerate(plan):
             if op.x < 0 or op.x >= width or op.y < 0 or op.y >= height or op.z < 0 or op.z >= length:
                 return f"Op {idx} out of bounds ({op.x},{op.y},{op.z})."

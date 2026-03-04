@@ -1,7 +1,7 @@
-import sys
+import argparse
 from minecraft_client import MinecraftClient
-from builder import Builder
-from schematic import save_schem, material_list, make_schem_name
+from manager import Manager
+from schematic import save_world_state, material_list, make_schem_name
 
 
 DEFAULT_PALETTE = [
@@ -14,14 +14,28 @@ DEFAULT_PALETTE = [
     "minecraft:torch",
 ]
 
-# Build volume (width, height, length) in blocks
-DEFAULT_SIZE = (7, 7, 7)
+DEFAULT_SIZE = (21, 15, 21)
 
 SCAFFOLD_BLOCK = "minecraft:red_wool"
 
 
 def main():
-    prompt = " ".join(sys.argv[1:]) if len(sys.argv) > 1 else None
+    parser = argparse.ArgumentParser(
+        description="Multi-agent Minecraft builder from natural language prompts."
+    )
+    parser.add_argument(
+        "--instant",
+        action="store_true",
+        help="Spawn blocks instantly with /setblock instead of Baritone pathfinding.",
+    )
+    parser.add_argument(
+        "prompt",
+        nargs="*",
+        help="Build prompt (e.g. 'a small house with a garden').",
+    )
+    args = parser.parse_args()
+
+    prompt = " ".join(args.prompt).strip() if args.prompt else None
     if not prompt:
         prompt = input("What should I build? > ").strip()
     if not prompt:
@@ -31,11 +45,10 @@ def main():
     print("Connecting to Minecraft listener ...")
     client = MinecraftClient()
 
-    # Build area starts a few blocks in front of the player
     pos = client.get_position()
     origin = (int(pos[0]) + 3, int(pos[1]), int(pos[2]))
-    w, h, l = DEFAULT_SIZE
-    end = (origin[0] + w - 1, origin[1] + h - 1, origin[2] + l - 1)
+    w, h, ln = DEFAULT_SIZE
+    end = (origin[0] + w - 1, origin[1] + h - 1, origin[2] + ln - 1)
 
     print(f"Prompt  : {prompt}")
     print(f"Origin  : {origin}")
@@ -43,54 +56,76 @@ def main():
     print(f"Palette : {len(DEFAULT_PALETTE)} block types")
     print(f"Scaffold: {SCAFFOLD_BLOCK}")
 
-    # --- 1. Plan the build via Azure OpenAI ---------------------------------
-    print("\n[1/3] Generating build plan ...")
-    builder = Builder(client)
-    plan = builder.build(
+    # --- 1. Manager decomposes and delegates to sub-builders ----------------
+    print("\n[1/3] Manager is decomposing build and delegating to sub-builders ...")
+    manager = Manager(client)
+    world_state = manager.build(
         prompt=prompt,
         bounds_min=origin,
         bounds_max=end,
-        palette=DEFAULT_PALETTE,
+        overall_palette=DEFAULT_PALETTE,
     )
-    print(f"  -> {len(plan)} block operations generated")
+    print(f"  -> {world_state.block_count} total blocks placed across all sub-builders")
 
-    # --- 2. Save as .schem for Baritone -------------------------------------
+    if world_state.block_count == 0:
+        print("No blocks were placed — nothing to build.")
+        client.close()
+        return
+
+    # --- 2. Save as .schem for Baritone ------------------------------------
     print("\n[2/3] Writing schematic ...")
-    size = (w, h, l)
+    size = (w, h, ln)
     schem_name = make_schem_name(prompt[:30])
-    schem_path, schem_name = save_schem(plan, size, filename=schem_name)
+    schem_path, schem_name = save_world_state(
+        world_state, size, filename=schem_name
+    )
     print(f"  -> Saved to {schem_path}")
 
-    # --- Materials needed ----------------------------------------------------
-    materials = material_list(plan)
-    print("\n  Materials needed in inventory:")
-    for block, count in sorted(materials.items()):
-        print(f"    {block}: {count}")
+    plan = world_state.to_block_ops()
+    ox, oy, oz = origin
 
-    # --- Creative mode: auto-give materials ----------------------------------
-    result = client.ensure_materials_if_creative(materials, SCAFFOLD_BLOCK)
-    if result.get("gave"):
-        print("  -> Creative mode: materials + scaffold added to inventory")
-
-    # --- 3. Tell Baritone to #build -----------------------------------------
-
-        print("\n[3/3] Starting Baritone #build (creative mode) ...")
+    if args.instant:
+        # --- Instant: spawn blocks directly with /setblock -----------------
+        print("\n[3/3] Placing blocks instantly (--instant) ...")
+        placed = 0
+        for op in plan:
+            if op.block == "minecraft:air":
+                continue
+            client.place_block(ox + op.x, oy + op.y, oz + op.z, op.block)
+            placed += 1
+            if placed % 50 == 0:
+                print(f"  -> {placed} blocks placed ...")
+        print(f"  -> {placed} blocks placed in world")
     else:
-        print("\n[3/3] Starting Baritone #build (survival mode) ...")
-    result = client.build_schematic(
-        filename=schem_name,
-        x=origin[0],
-        y=origin[1],
-        z=origin[2],
-        scaffold_block=SCAFFOLD_BLOCK,
-    )
-    print(f"  -> {result.get('message', result)}")
+        # --- Materials needed -----------------------------------------------
+        materials = material_list(plan)
+        print("\n  Materials needed in inventory:")
+        for block, count in sorted(materials.items()):
+            print(f"    {block}: {count}")
 
-    print(
-        f"\nBaritone is now building in-game using items from your inventory."
-        f"\nScaffold block: {SCAFFOLD_BLOCK} (will be left in place for debugging)."
-        f"\nUse '#stop' in chat to cancel, or '#build' to resume."
-    )
+        # --- Creative mode: auto-give materials ----------------------------
+        result = client.ensure_materials_if_creative(materials, SCAFFOLD_BLOCK)
+        if result.get("gave"):
+            print("  -> Creative mode: materials + scaffold added to inventory")
+            print("\n[3/3] Starting Baritone #build (creative mode) ...")
+        else:
+            print("\n[3/3] Starting Baritone #build (survival mode) ...")
+
+        # --- Tell Baritone to #build ----------------------------------------
+        result = client.build_schematic(
+            filename=schem_name,
+            x=origin[0],
+            y=origin[1],
+            z=origin[2],
+            scaffold_block=SCAFFOLD_BLOCK,
+        )
+        print(f"  -> {result.get('message', result)}")
+
+        print(
+            f"\nBaritone is now building in-game using items from your inventory."
+            f"\nScaffold block: {SCAFFOLD_BLOCK} (will be left in place for debugging)."
+            f"\nUse '#stop' in chat to cancel, or '#build' to resume."
+        )
 
     client.close()
 

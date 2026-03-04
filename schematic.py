@@ -260,6 +260,17 @@ def make_schem_name(label: str = "build") -> str:
     return f"craftsmen_{safe}_{ts}.schem"
 
 
+def _default_schematics_dir() -> str:
+    """Return the platform-specific Baritone schematics directory."""
+    if sys.platform == "win32":
+        base = os.getenv("APPDATA", "")
+    elif sys.platform == "darwin":
+        base = os.path.expanduser("~/Library/Application Support")
+    else:
+        base = os.path.expanduser("~/.local/share")
+    return os.path.join(base, "ModrinthApp", "profiles", "Craftsmen", "schematics")
+
+
 def save_schem(
     plan: List[BlockOp],
     size: Tuple[int, int, int],
@@ -287,13 +298,7 @@ def save_schem(
         filename = make_schem_name()
 
     if schematics_dir is None:
-        if sys.platform == "win32":
-            base = os.getenv("APPDATA", "")
-        elif sys.platform == "darwin":
-            base = os.path.expanduser("~/Library/Application Support")
-        else:
-            base = os.path.expanduser("~/.local/share")
-        schematics_dir = os.path.join(base, "ModrinthApp", "profiles", "Craftsmen", "schematics")
+        schematics_dir = _default_schematics_dir()
 
     os.makedirs(schematics_dir, exist_ok=True)
     path = os.path.join(schematics_dir, filename)
@@ -303,3 +308,30 @@ def save_schem(
         f.write(data)
 
     return path, filename
+
+
+def save_world_state(
+    world_state,
+    size: Tuple[int, int, int],
+    filename: str = None,
+    schematics_dir: str = None,
+    data_version: int = 3700,
+) -> Tuple[str, str]:
+    """Write a :class:`WorldState` as a ``.schem`` file.
+
+    Converts the world state's block dict to a plan and delegates to
+    :func:`save_schem`.  Coordinates in the world state are expected to be
+    relative to the overall build origin (0-indexed).
+
+    Args:
+        world_state:  A :class:`world_state.WorldState` instance.
+        size:  (width, height, length) of the overall build volume.
+        filename:  Optional schematic filename.
+        schematics_dir:  Optional override for the schematics directory.
+        data_version:  Minecraft data version.
+
+    Returns:
+        ``(absolute_path, filename)`` tuple.
+    """
+    plan = world_state.to_block_ops()
+    return save_schem(plan, size, filename, schematics_dir, data_version)
