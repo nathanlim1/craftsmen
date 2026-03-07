@@ -303,3 +303,14 @@ def save_schem(
         f.write(data)
 
     return path, filename
+
+
+def filter_plan_for_schematic(plan: List[BlockOp]) -> Tuple[List[BlockOp], List[str]]:
+    """
+    Public helper for evaluation code.
+
+    Apply the same blacklist filtering that ``plan_to_schem`` uses and
+    return ``(filtered_plan, removed_block_ids)``.  This does not write
+    any files or modify the input list.
+    """
+    return _filter_blacklisted(plan)
