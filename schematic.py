@@ -7,6 +7,7 @@ No external dependencies — contains a self-contained minimal NBT writer.
 
 import gzip
 import io
+import json
 import os
 import struct
 import time
@@ -105,52 +106,53 @@ def _encode_varint(value: int) -> bytes:
 
 # ── Public API ─────────────────────────────────────────────────────────────
 
+BLACKLIST_FILE = os.path.join(
+    os.path.dirname(__file__),
+    "blacklisted_blocks.json",
+)
+
+
+def _load_blacklisted_blocks(path: str) -> set[str]:
+    """
+    Load block IDs from a JSON file.
+
+    Accepted formats:
+      - ["minecraft:oak_door", ...]
+      - {"blocks": ["minecraft:oak_door", ...]}
+    """
+    with open(path, "r", encoding="utf-8") as f:
+        payload = json.load(f)
+
+    if isinstance(payload, dict):
+        raw_blocks = payload.get("blocks", [])
+    elif isinstance(payload, list):
+        raw_blocks = payload
+    else:
+        raise ValueError(
+            f"Invalid blacklist format in {path}: expected list or object"
+        )
+
+    if not isinstance(raw_blocks, list):
+        raise ValueError(
+            f"Invalid blacklist format in {path}: 'blocks' must be a list"
+        )
+
+    normalized: set[str] = set()
+    for entry in raw_blocks:
+        if not isinstance(entry, str):
+            raise ValueError(
+                f"Invalid blacklist entry in {path}: expected string, got {type(entry).__name__}"
+            )
+        block_id = entry.strip().lower()
+        if block_id:
+            normalized.add(block_id)
+
+    return normalized
+
+
 # Multi-part or state-dependent blocks that Baritone can't reliably place.
 # These are stripped from the plan before writing the schematic.
-BLACKLISTED_BLOCKS = {
-    # Doors (two-tall, orientation-dependent)
-    "minecraft:oak_door",
-    "minecraft:spruce_door",
-    "minecraft:birch_door",
-    "minecraft:jungle_door",
-    "minecraft:acacia_door",
-    "minecraft:dark_oak_door",
-    "minecraft:mangrove_door",
-    "minecraft:cherry_door",
-    "minecraft:bamboo_door",
-    "minecraft:crimson_door",
-    "minecraft:warped_door",
-    "minecraft:iron_door",
-    # Beds (two-wide, directional)
-    "minecraft:white_bed",
-    "minecraft:orange_bed",
-    "minecraft:magenta_bed",
-    "minecraft:light_blue_bed",
-    "minecraft:yellow_bed",
-    "minecraft:lime_bed",
-    "minecraft:pink_bed",
-    "minecraft:gray_bed",
-    "minecraft:light_gray_bed",
-    "minecraft:cyan_bed",
-    "minecraft:purple_bed",
-    "minecraft:blue_bed",
-    "minecraft:brown_bed",
-    "minecraft:green_bed",
-    "minecraft:red_bed",
-    "minecraft:black_bed",
-    # Tall plants / double blocks
-    "minecraft:tall_grass",
-    "minecraft:large_fern",
-    "minecraft:sunflower",
-    "minecraft:lilac",
-    "minecraft:rose_bush",
-    "minecraft:peony",
-    "minecraft:tall_seagrass",
-    "minecraft:pitcher_plant",
-    # Banners (entity-heavy, orientation)
-    "minecraft:white_banner",
-    "minecraft:black_banner",
-}
+BLACKLISTED_BLOCKS = _load_blacklisted_blocks(BLACKLIST_FILE)
 
 
 def _filter_blacklisted(plan: List[BlockOp]) -> Tuple[List[BlockOp], List[str]]:
@@ -275,6 +277,7 @@ def save_schem(
         filename:  Name of the schematic file.  If *None*, a unique
                    timestamped name is generated.
         schematics_dir:  Override path.  Defaults to
+                         ``$CRAFTSMEN_SCHEMATICS_DIR`` when set, otherwise
                          ``%APPDATA%/ModrinthApp/profiles/Craftsmen/schematics``.
         data_version:  Minecraft data version.
 
@@ -285,8 +288,29 @@ def save_schem(
         filename = make_schem_name()
 
     if schematics_dir is None:
-        appdata = os.getenv("APPDATA", "")
-        schematics_dir = os.path.join(appdata, "ModrinthApp", "profiles", "Craftsmen", "schematics")
+        override = os.getenv("CRAFTSMEN_SCHEMATICS_DIR")
+        if override:
+            schematics_dir = os.path.expandvars(os.path.expanduser(override))
+        else:
+            appdata = os.getenv("APPDATA")
+            if appdata:
+                schematics_dir = os.path.join(
+                    appdata,
+                    "ModrinthApp",
+                    "profiles",
+                    "Craftsmen",
+                    "schematics",
+                )
+            else:
+                schematics_dir = os.path.join(
+                    os.path.expanduser("~"),
+                    "AppData",
+                    "Roaming",
+                    "ModrinthApp",
+                    "profiles",
+                    "Craftsmen",
+                    "schematics",
+                )
 
     os.makedirs(schematics_dir, exist_ok=True)
     path = os.path.join(schematics_dir, filename)
