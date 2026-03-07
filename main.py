@@ -4,17 +4,7 @@ from manager import Manager
 from schematic import save_world_state, material_list, make_schem_name
 
 
-DEFAULT_PALETTE = [
-    "minecraft:oak_planks",
-    "minecraft:oak_log",
-    "minecraft:glass",
-    "minecraft:cobblestone",
-    "minecraft:oak_stairs",
-    "minecraft:oak_slab",
-    "minecraft:torch",
-]
-
-DEFAULT_SIZE = (21, 15, 21)
+DEFAULT_SIZE = (50, 15, 50)
 
 SCAFFOLD_BLOCK = "minecraft:red_wool"
 
@@ -53,7 +43,6 @@ def main():
     print(f"Prompt  : {prompt}")
     print(f"Origin  : {origin}")
     print(f"Size    : {DEFAULT_SIZE}")
-    print(f"Palette : {len(DEFAULT_PALETTE)} block types")
     print(f"Scaffold: {SCAFFOLD_BLOCK}")
 
     # --- 1. Manager decomposes and delegates to sub-builders ----------------
@@ -63,7 +52,6 @@ def main():
         prompt=prompt,
         bounds_min=origin,
         bounds_max=end,
-        overall_palette=DEFAULT_PALETTE,
     )
     print(f"  -> {world_state.block_count} total blocks placed across all sub-builders")
 

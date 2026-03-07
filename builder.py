@@ -36,7 +36,6 @@ class BuilderState(TypedDict, total=False):
     bounds_max: Tuple[int, int, int]
     size: Tuple[int, int, int]
     palette: List[str]
-    context_blocks: List[BlockOp]
     max_blocks: int
     attempts: int
     plan: List[BlockOp]
@@ -48,7 +47,7 @@ class Builder:
     def __init__(
         self,
         client: MinecraftClient,
-        model: str = "gpt-5.1",
+        model: str = "gpt-5.2",
         max_blocks: int = 600,
         max_retries: int = 2,
     ) -> None:
@@ -88,7 +87,6 @@ class Builder:
         bounds_min: Tuple[int, int, int],
         bounds_max: Tuple[int, int, int],
         palette: List[str],
-        context_blocks: Optional[List[BlockOp]] = None,
         move_agent: bool = True,
         verify: bool = False,
     ) -> List[BlockOp]:
@@ -102,7 +100,6 @@ class Builder:
             "bounds_max": bounds_max,
             "size": size,
             "palette": palette,
-            "context_blocks": context_blocks or [],
             "max_blocks": self.max_blocks,
             "attempts": 0,
             "error": None,
@@ -141,7 +138,6 @@ class Builder:
             palette=state["palette"],
             max_blocks=state["max_blocks"],
             last_error=state.get("last_error"),
-            context_blocks=state.get("context_blocks", []),
         )
 
         try:
@@ -225,7 +221,6 @@ class Builder:
         palette: List[str],
         max_blocks: int,
         last_error: Optional[str],
-        context_blocks: Optional[List[BlockOp]] = None,
     ) -> Tuple[str, str]:
         width, height, length = size
         palette_text = ", ".join(palette)
@@ -238,14 +233,6 @@ class Builder:
         )
         error_hint = f"\nPrevious error: {last_error}" if last_error else ""
 
-        context_section = ""
-        if context_blocks:
-            context_section = (
-                "\n\nExisting blocks in your visible context (read-only reference, "
-                "you may only place blocks within your construction zone above):\n"
-                + self._format_context_blocks(context_blocks)
-            )
-
         user_text = (
             f"Build request: {prompt}\n"
             f"Bounds size (relative): width={width}, height={height}, length={length}\n"
@@ -253,21 +240,8 @@ class Builder:
             f"Palette: {palette_text}\n"
             f"Max blocks: {max_blocks}\n"
             f"{error_hint}"
-            f"{context_section}"
         )
         return system_text, user_text
-
-    @staticmethod
-    def _format_context_blocks(blocks: List[BlockOp]) -> str:
-        """Compact representation of context blocks grouped by type."""
-        from collections import defaultdict
-        grouped: dict = defaultdict(list)
-        for op in blocks:
-            grouped[op.block].append(f"({op.x},{op.y},{op.z})")
-        lines = []
-        for block, coords in sorted(grouped.items()):
-            lines.append(f"{block}: {', '.join(coords)}")
-        return "\n".join(lines)
 
     def _validate_plan(
         self,
@@ -286,7 +260,9 @@ class Builder:
             if op.x < 0 or op.x >= width or op.y < 0 or op.y >= height or op.z < 0 or op.z >= length:
                 return f"Op {idx} out of bounds ({op.x},{op.y},{op.z})."
             if op.block not in palette_set:
-                return f"Op {idx} uses disallowed block: {op.block}."
+                err = f"Op {idx} uses disallowed block: {op.block}."
+                print(f"  [Builder] Invalid block: {err}")
+                return err
 
         return None
 
@@ -348,7 +324,9 @@ class Builder:
         for block in palette:
             block_id = block.strip().lower()
             if not block_id.startswith("minecraft:"):
-                raise ValueError(f"Palette block must be minecraft:* id, got {block}")
+                err = f"Palette block must be minecraft:* id, got {block}"
+                print(f"  [Builder] Invalid palette: {err}")
+                raise ValueError(err)
             normalized.append(block_id)
         return normalized
 

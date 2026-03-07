@@ -8,11 +8,25 @@ from langchain_openai import AzureChatOpenAI, ChatOpenAI
 from langgraph.prebuilt import create_react_agent
 from pydantic import BaseModel, Field
 
+from block_ids import validate_palette
 from builder import BlockOp, Builder
 from minecraft_client import MinecraftClient
+from validator import ValidationAgent
 from world_state import WorldState
 
 load_dotenv()
+
+MAX_ZONE_VOLUME = 650
+
+
+def _merge_ops(plan: List[BlockOp], fix_ops: List[BlockOp]) -> List[BlockOp]:
+    """Merge plan with fix_ops; fix_ops overwrite overlapping positions."""
+    by_pos: dict = {}
+    for op in plan:
+        by_pos[(op.x, op.y, op.z)] = op
+    for op in fix_ops:
+        by_pos[(op.x, op.y, op.z)] = op
+    return list(by_pos.values())
 
 
 MANAGER_SYSTEM_PROMPT = """\
@@ -23,28 +37,27 @@ You operate within an overall build volume of size {width} x {height} x {length}
 All coordinates are relative to the build origin: x ranges from 0 to {max_x},
 y (vertical) from 0 to {max_y}, z from 0 to {max_z}.
 
-Available palette for the entire build: {palette}
-
 For each sub-task, you call the delegate_build tool with:
-- query: a clear, detailed description of what to build
+- query: a concise description of what to build (prefer brevity; short phrases over long prose)
 - zone_min, zone_max: the construction zone where the sub-builder can place blocks
-  (inclusive, relative to overall origin)
-- context_min, context_max: a bounding box of existing blocks the sub-builder can see
-  for reference (should be >= the construction zone)
-- palette: a subset (or all) of the available palette appropriate for this sub-task
+  (inclusive, relative to overall origin). Zone volume (width×height×length) must not
+  exceed {max_zone_volume} blocks.
+- palette: a list of minecraft block IDs appropriate for this sub-task (e.g.
+  minecraft:oak_planks, minecraft:glass). Choose blocks entirely based on your own
+  judgment for what fits the build. Air (minecraft:air) is always available.
 
 Guidelines:
-- Prefer FEWER, LARGER delegations. Bundle entire structural shells in single calls:
-  e.g. "foundation + walls + roof" for one building should be ONE sub-builder call, not
-  separate calls for foundation, walls, and roof. The sub-builder can plan the full
-  structure and place all blocks in one pass.
-- Only split into separate calls when components are truly distinct: different buildings
-  (e.g. house vs barn in a village), or interior details vs exterior shell, or
-  add-ons that depend on an existing structure.
-- Each delegate_build call should cover a substantial, coherent chunk of the build.
+- One delegation per structure: each distinct structure (house, barn, well, garden,
+  wall, tower, etc.) gets exactly one delegate_build call.
+- Within a single structure, bundle everything in one call: foundation + walls + roof
+  (and interior if part of the same structure) should be ONE sub-builder call. The
+  sub-builder can plan the full structure and place all blocks in one pass.
+- Do not bundle multiple structures in one call: a house and a barn are two delegations.
+- Each delegate_build call should cover one complete structure.
+- Sub-builders work in isolation. Prefer very concise queries: short, direct phrases
+  rather than long descriptions. Include only essential detail.
+- Each zone must be at most {max_zone_volume} blocks in volume (width×height×length).
 - Zones may overlap if you want a later sub-builder to refine or replace earlier work
-- Context bounds should typically be equal to or larger than construction bounds so the
-  sub-builder can see neighboring structures for alignment
 - Air (minecraft:air) is always available to every sub-builder for clearing blocks
 - You have a maximum of {max_delegations} delegate_build calls
 - Review the placed blocks returned after each delegation before planning the next one
@@ -57,7 +70,7 @@ class DelegateBuildInput(BaseModel):
     """Input schema for the delegate_build tool."""
 
     query: str = Field(
-        description="Clear description of what the sub-builder should construct."
+        description="Concise description of what the sub-builder should construct."
     )
     zone_min: List[int] = Field(
         description=(
@@ -68,18 +81,6 @@ class DelegateBuildInput(BaseModel):
     zone_max: List[int] = Field(
         description=(
             "[x, y, z] maximum corner of the construction zone "
-            "(inclusive, relative to overall origin)."
-        )
-    )
-    context_min: List[int] = Field(
-        description=(
-            "[x, y, z] minimum corner of the visible context window "
-            "(inclusive, relative to overall origin)."
-        )
-    )
-    context_max: List[int] = Field(
-        description=(
-            "[x, y, z] maximum corner of the visible context window "
             "(inclusive, relative to overall origin)."
         )
     )
@@ -97,7 +98,7 @@ class Manager:
     def __init__(
         self,
         client: MinecraftClient,
-        model: str = "gpt-5.1",
+        model: str = "gpt-5.4",
         max_delegations: int = 10,
         max_blocks_per_sub: int = 600,
         max_retries_per_sub: int = 2,
@@ -139,7 +140,6 @@ class Manager:
         prompt: str,
         bounds_min: Tuple[int, int, int],
         bounds_max: Tuple[int, int, int],
-        overall_palette: List[str],
     ) -> WorldState:
         """Decompose *prompt* into sub-tasks and build via delegated sub-builders.
 
@@ -166,6 +166,7 @@ class Manager:
             max_blocks=self.max_blocks_per_sub,
             max_retries=self.max_retries_per_sub,
         )
+        validator = ValidationAgent(model=self.model)
 
         max_delegations = self.max_delegations
 
@@ -175,8 +176,6 @@ class Manager:
             query: str,
             zone_min: List[int],
             zone_max: List[int],
-            context_min: List[int],
-            context_max: List[int],
             palette: List[str],
         ) -> str:
             nonlocal delegation_count
@@ -191,8 +190,6 @@ class Manager:
 
             zone_min_t: Tuple[int, int, int] = tuple(zone_min)  # type: ignore[assignment]
             zone_max_t: Tuple[int, int, int] = tuple(zone_max)  # type: ignore[assignment]
-            context_min_t: Tuple[int, int, int] = tuple(context_min)  # type: ignore[assignment]
-            context_max_t: Tuple[int, int, int] = tuple(context_max)  # type: ignore[assignment]
 
             for i, (lo, hi, dim) in enumerate(
                 zip(zone_min_t, zone_max_t, overall_size)
@@ -204,20 +201,18 @@ class Manager:
                         f"overall bounds [0, {dim - 1}]. Adjust and retry."
                     )
 
-            # Context blocks in overall-relative coords, translated to zone-relative
-            context_blocks_global = world_state.get_blocks_in_bounds(
-                context_min_t, context_max_t
+            zone_volume = (
+                (zone_max_t[0] - zone_min_t[0] + 1)
+                * (zone_max_t[1] - zone_min_t[1] + 1)
+                * (zone_max_t[2] - zone_min_t[2] + 1)
             )
-            zmin_x, zmin_y, zmin_z = zone_min_t
-            context_blocks_relative = [
-                BlockOp(
-                    x=op.x - zmin_x,
-                    y=op.y - zmin_y,
-                    z=op.z - zmin_z,
-                    block=op.block,
+            if zone_volume > MAX_ZONE_VOLUME:
+                msg = (
+                    f"Zone volume {zone_volume} exceeds maximum ({MAX_ZONE_VOLUME} blocks). "
+                    "Use a smaller zone."
                 )
-                for op in context_blocks_global
-            ]
+                print(f"  [Manager] {msg}")
+                return f"Error: {msg}"
 
             sub_bounds_min = (0, 0, 0)
             sub_bounds_max = (
@@ -226,10 +221,20 @@ class Manager:
                 zone_max_t[2] - zone_min_t[2],
             )
 
+            valid_palette, invalid_blocks = validate_palette(palette)
+            if invalid_blocks:
+                msg = (
+                    f"Invalid palette blocks (not valid Minecraft block IDs): "
+                    f"{', '.join(invalid_blocks)}. Use only minecraft:* block IDs "
+                    f"from the game (e.g. minecraft:oak_planks, minecraft:stone)."
+                )
+                print(f"  [Manager] {msg}")
+                return f"Error: {msg}"
+
             print(
                 f"  [Manager] Delegation #{delegation_count}: "
                 f"query={query!r}, zone={zone_min_t}-{zone_max_t}, "
-                f"palette={len(palette)} blocks"
+                f"palette={len(valid_palette)} blocks"
             )
 
             try:
@@ -237,13 +242,30 @@ class Manager:
                     prompt=query,
                     bounds_min=sub_bounds_min,
                     bounds_max=sub_bounds_max,
-                    palette=palette,
-                    context_blocks=context_blocks_relative,
+                    palette=valid_palette,
                 )
             except (ValueError, RuntimeError) as exc:
+                print(f"  [Manager] Sub-builder error: {exc}")
                 return f"Sub-builder error: {exc}"
 
-            translated_ops = world_state.apply_ops(plan, zone_min=zone_min_t)
+            zone_size = (
+                zone_max_t[0] - zone_min_t[0] + 1,
+                zone_max_t[1] - zone_min_t[1] + 1,
+                zone_max_t[2] - zone_min_t[2] + 1,
+            )
+            fix_ops = validator.validate(
+                query=query,
+                size=zone_size,
+                placed_blocks=plan,
+                palette=valid_palette,
+            )
+            if fix_ops:
+                print(f"  [Manager] Validator added {len(fix_ops)} fix ops")
+                merged = _merge_ops(plan, fix_ops)
+            else:
+                merged = plan
+
+            translated_ops = world_state.apply_ops(merged, zone_min=zone_min_t)
 
             print(
                 f"  [Manager] Sub-builder placed {len(translated_ops)} blocks"
@@ -280,8 +302,8 @@ class Manager:
             max_x=width - 1,
             max_y=height - 1,
             max_z=length - 1,
-            palette=", ".join(overall_palette),
             max_delegations=max_delegations,
+            max_zone_volume=MAX_ZONE_VOLUME,
         )
 
         agent = create_react_agent(self._llm, tools=[delegate_tool])
