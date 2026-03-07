@@ -6,7 +6,7 @@ from langgraph.graph import END, StateGraph
 from langchain_openai import AzureChatOpenAI, ChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage
 from pydantic import BaseModel, Field
-from minecraft_client import MinecraftClient
+from src.minecraft_client import MinecraftClient
 
 
 load_dotenv()
@@ -47,7 +47,7 @@ class Builder:
     def __init__(
         self,
         client: MinecraftClient,
-        model: str = "gpt-5.1",
+        model: str = "gpt-5.2",
         max_blocks: int = 600,
         max_retries: int = 2,
     ) -> None:
@@ -228,9 +228,11 @@ class Builder:
             "You are a Minecraft build planner. "
             "Return only a structured plan that matches the schema: "
             "ops: list of { x:int, y:int, z:int, block:string }. "
-            "Respect bounds, palette, and max block constraints."
+            "Respect bounds, palette, and max block constraints. "
+            "You may place minecraft:air to leave a position empty or clear an existing block."
         )
         error_hint = f"\nPrevious error: {last_error}" if last_error else ""
+
         user_text = (
             f"Build request: {prompt}\n"
             f"Bounds size (relative): width={width}, height={height}, length={length}\n"
@@ -253,11 +255,14 @@ class Builder:
 
         width, height, length = size
         palette_set = set(palette)
+        palette_set.add("minecraft:air")
         for idx, op in enumerate(plan):
             if op.x < 0 or op.x >= width or op.y < 0 or op.y >= height or op.z < 0 or op.z >= length:
                 return f"Op {idx} out of bounds ({op.x},{op.y},{op.z})."
             if op.block not in palette_set:
-                return f"Op {idx} uses disallowed block: {op.block}."
+                err = f"Op {idx} uses disallowed block: {op.block}."
+                print(f"  [Builder] Invalid block: {err}")
+                return err
 
         return None
 
@@ -319,13 +324,16 @@ class Builder:
         for block in palette:
             block_id = block.strip().lower()
             if not block_id.startswith("minecraft:"):
-                raise ValueError(f"Palette block must be minecraft:* id, got {block}")
+                err = f"Palette block must be minecraft:* id, got {block}"
+                print(f"  [Builder] Invalid palette: {err}")
+                raise ValueError(err)
             normalized.append(block_id)
         return normalized
 
 
 if __name__ == "__main__":
-    from schematic import save_schem, material_list
+    from src.core.schematic import save_schem, material_list
+    from src.minecraft_client import MinecraftClient
 
     client = MinecraftClient()
     pos = client.get_position()

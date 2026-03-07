@@ -7,7 +7,6 @@ No external dependencies — contains a self-contained minimal NBT writer.
 
 import gzip
 import io
-import json
 import os
 import struct
 import sys
@@ -15,7 +14,7 @@ import time
 from collections import Counter
 from typing import Dict, List, Tuple
 
-from builder import BlockOp
+from src.agents.builder import BlockOp
 
 
 # ── Minimal NBT binary writer ──────────────────────────────────────────────
@@ -107,53 +106,7 @@ def _encode_varint(value: int) -> bytes:
 
 # ── Public API ─────────────────────────────────────────────────────────────
 
-BLACKLIST_FILE = os.path.join(
-    os.path.dirname(__file__),
-    "blacklisted_blocks.json",
-)
-
-
-def _load_blacklisted_blocks(path: str) -> set[str]:
-    """
-    Load block IDs from a JSON file.
-
-    Accepted formats:
-      - ["minecraft:oak_door", ...]
-      - {"blocks": ["minecraft:oak_door", ...]}
-    """
-    with open(path, "r", encoding="utf-8") as f:
-        payload = json.load(f)
-
-    if isinstance(payload, dict):
-        raw_blocks = payload.get("blocks", [])
-    elif isinstance(payload, list):
-        raw_blocks = payload
-    else:
-        raise ValueError(
-            f"Invalid blacklist format in {path}: expected list or object"
-        )
-
-    if not isinstance(raw_blocks, list):
-        raise ValueError(
-            f"Invalid blacklist format in {path}: 'blocks' must be a list"
-        )
-
-    normalized: set[str] = set()
-    for entry in raw_blocks:
-        if not isinstance(entry, str):
-            raise ValueError(
-                f"Invalid blacklist entry in {path}: expected string, got {type(entry).__name__}"
-            )
-        block_id = entry.strip().lower()
-        if block_id:
-            normalized.add(block_id)
-
-    return normalized
-
-
-# Multi-part or state-dependent blocks that Baritone can't reliably place.
-# These are stripped from the plan before writing the schematic.
-BLACKLISTED_BLOCKS = _load_blacklisted_blocks(BLACKLIST_FILE)
+from src.core.blacklist import BLACKLISTED_BLOCKS
 
 
 def _filter_blacklisted(plan: List[BlockOp]) -> Tuple[List[BlockOp], List[str]]:
@@ -262,6 +215,17 @@ def make_schem_name(label: str = "build") -> str:
     return f"craftsmen_{safe}_{ts}.schem"
 
 
+def _default_schematics_dir() -> str:
+    """Return the platform-specific Baritone schematics directory."""
+    if sys.platform == "win32":
+        base = os.getenv("APPDATA", "")
+    elif sys.platform == "darwin":
+        base = os.path.expanduser("~/Library/Application Support")
+    else:
+        base = os.path.expanduser("~/.local/share")
+    return os.path.join(base, "ModrinthApp", "profiles", "Craftsmen", "schematics")
+
+
 def save_schem(
     plan: List[BlockOp],
     size: Tuple[int, int, int],
@@ -294,25 +258,7 @@ def save_schem(
         if override:
             schematics_dir = os.path.expandvars(os.path.expanduser(override))
         else:
-            appdata = os.getenv("APPDATA")
-            if appdata:
-                schematics_dir = os.path.join(
-                    appdata,
-                    "ModrinthApp",
-                    "profiles",
-                    "Craftsmen",
-                    "schematics",
-                )
-            else:
-                schematics_dir = os.path.join(
-                    os.path.expanduser("~"),
-                    "AppData",
-                    "Roaming",
-                    "ModrinthApp",
-                    "profiles",
-                    "Craftsmen",
-                    "schematics",
-                )
+            schematics_dir = _default_schematics_dir()
 
     os.makedirs(schematics_dir, exist_ok=True)
     path = os.path.join(schematics_dir, filename)
@@ -322,6 +268,33 @@ def save_schem(
         f.write(data)
 
     return path, filename
+
+
+def save_world_state(
+    world_state,
+    size: Tuple[int, int, int],
+    filename: str = None,
+    schematics_dir: str = None,
+    data_version: int = 3700,
+) -> Tuple[str, str]:
+    """Write a :class:`WorldState` as a ``.schem`` file.
+
+    Converts the world state's block dict to a plan and delegates to
+    :func:`save_schem`.  Coordinates in the world state are expected to be
+    relative to the overall build origin (0-indexed).
+
+    Args:
+        world_state:  A :class:`world_state.WorldState` instance.
+        size:  (width, height, length) of the overall build volume.
+        filename:  Optional schematic filename.
+        schematics_dir:  Optional override for the schematics directory.
+        data_version:  Minecraft data version.
+
+    Returns:
+        ``(absolute_path, filename)`` tuple.
+    """
+    plan = world_state.to_block_ops()
+    return save_schem(plan, size, filename, schematics_dir, data_version)
 
 
 def filter_plan_for_schematic(plan: List[BlockOp]) -> Tuple[List[BlockOp], List[str]]:

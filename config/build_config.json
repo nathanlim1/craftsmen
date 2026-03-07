@@ -1,7 +1,9 @@
 {
-  "prompt": "Build a several story oak watchtower",
-  "mode": "auto",
-  "size": [15, 15, 15],
+  "_comment": "palette applies only when agent_mode is 'single'. Multi-agent ignores it.",
+  "prompt": "Build a two story 8x8 house.",
+  "agent_mode": "multi",
+  "placement_mode": "auto",
+  "size": [50, 15, 50],
   "origin_offset": [3, 0, 0],
   "scaffold_block": "minecraft:red_wool",
   "palette": [

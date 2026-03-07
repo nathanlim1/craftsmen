@@ -3,27 +3,16 @@ import gzip
 import io
 import os
 import struct
+import sys
 from collections import Counter
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
 
-from builder import BlockOp, Builder
-from schematic import save_schem, filter_plan_for_schematic
+# Add project root to path so "from src.*" works without pip install -e .
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-
-try:
-    # Reuse the defaults from the main pipeline if available.
-    from main import DEFAULT_PALETTE, DEFAULT_SIZE
-except Exception:  # pragma: no cover - defensive fallback
-    DEFAULT_PALETTE = [
-        "minecraft:oak_planks",
-        "minecraft:oak_log",
-        "minecraft:glass",
-        "minecraft:cobblestone",
-        "minecraft:oak_stairs",
-        "minecraft:oak_slab",
-        "minecraft:torch",
-    ]
-    DEFAULT_SIZE = (7, 7, 7)
+from src.agents.builder import BlockOp, Builder
+from src.config_defaults import DEFAULT_PALETTE, DEFAULT_SIZE
+from src.core.schematic import filter_plan_for_schematic, save_schem
 
 
 # ============================================================================
