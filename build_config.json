@@ -1,0 +1,19 @@
+{
+  "_comment": "palette applies only when agent_mode is 'single'. Multi-agent ignores it.",
+  "prompt": "Build a several story oak watchtower",
+  "agent_mode": "multi",
+  "placement_mode": "baritone",
+  "size": [50, 15, 50],
+  "origin_offset": [3, 0, 0],
+  "scaffold_block": "minecraft:red_wool",
+  "palette": [
+    "minecraft:oak_planks",
+    "minecraft:oak_log",
+    "minecraft:glass",
+    "minecraft:cobblestone",
+    "minecraft:oak_slab",
+    "minecraft:oak_fence",
+    "minecraft:dirt",
+    "minecraft:grass_block"
+  ]
+}

@@ -7,6 +7,7 @@ No external dependencies — contains a self-contained minimal NBT writer.
 
 import gzip
 import io
+import json
 import os
 import struct
 import sys
@@ -106,10 +107,13 @@ def _encode_varint(value: int) -> bytes:
 
 # ── Public API ─────────────────────────────────────────────────────────────
 
-# Multi-part or state-dependent blocks that Baritone can't reliably place.
-# These are stripped from the plan before writing the schematic.
-BLACKLISTED_BLOCKS = {
-    # Doors (two-tall, orientation-dependent)
+BLACKLIST_FILE = os.path.join(
+    os.path.dirname(__file__),
+    "blacklisted_blocks.json",
+)
+
+# Fallback when blacklisted_blocks.json is missing
+_DEFAULT_BLACKLISTED_BLOCKS = {
     "minecraft:oak_door",
     "minecraft:spruce_door",
     "minecraft:birch_door",
@@ -122,7 +126,6 @@ BLACKLISTED_BLOCKS = {
     "minecraft:crimson_door",
     "minecraft:warped_door",
     "minecraft:iron_door",
-    # Beds (two-wide, directional)
     "minecraft:white_bed",
     "minecraft:orange_bed",
     "minecraft:magenta_bed",
@@ -139,7 +142,6 @@ BLACKLISTED_BLOCKS = {
     "minecraft:green_bed",
     "minecraft:red_bed",
     "minecraft:black_bed",
-    # Tall plants / double blocks
     "minecraft:tall_grass",
     "minecraft:large_fern",
     "minecraft:sunflower",
@@ -148,10 +150,59 @@ BLACKLISTED_BLOCKS = {
     "minecraft:peony",
     "minecraft:tall_seagrass",
     "minecraft:pitcher_plant",
-    # Banners (entity-heavy, orientation)
     "minecraft:white_banner",
     "minecraft:black_banner",
 }
+
+
+def _load_blacklisted_blocks(path: str) -> set[str]:
+    """
+    Load block IDs from a JSON file.
+
+    Accepted formats:
+      - ["minecraft:oak_door", ...]
+      - {"blocks": ["minecraft:oak_door", ...]}
+    """
+    with open(path, "r", encoding="utf-8") as f:
+        payload = json.load(f)
+
+    if isinstance(payload, dict):
+        raw_blocks = payload.get("blocks", [])
+    elif isinstance(payload, list):
+        raw_blocks = payload
+    else:
+        raise ValueError(
+            f"Invalid blacklist format in {path}: expected list or object"
+        )
+
+    if not isinstance(raw_blocks, list):
+        raise ValueError(
+            f"Invalid blacklist format in {path}: 'blocks' must be a list"
+        )
+
+    normalized: set[str] = set()
+    for entry in raw_blocks:
+        if not isinstance(entry, str):
+            raise ValueError(
+                f"Invalid blacklist entry in {path}: expected string, got {type(entry).__name__}"
+            )
+        block_id = entry.strip().lower()
+        if block_id:
+            normalized.add(block_id)
+
+    return normalized
+
+
+def _get_blacklisted_blocks() -> set[str]:
+    """Load blacklist from JSON, or fall back to default when file is missing."""
+    if not os.path.exists(BLACKLIST_FILE):
+        return _DEFAULT_BLACKLISTED_BLOCKS
+    return _load_blacklisted_blocks(BLACKLIST_FILE)
+
+
+# Multi-part or state-dependent blocks that Baritone can't reliably place.
+# These are stripped from the plan before writing the schematic.
+BLACKLISTED_BLOCKS = _get_blacklisted_blocks()
 
 
 def _filter_blacklisted(plan: List[BlockOp]) -> Tuple[List[BlockOp], List[str]]:
@@ -286,7 +337,8 @@ def save_schem(
         size:  (width, height, length).
         filename:  Name of the schematic file.  If *None*, a unique
                    timestamped name is generated.
-        schematics_dir:  Override path.  Defaults to platform-specific:
+        schematics_dir:  Override path.  Defaults to
+                         ``$CRAFTSMEN_SCHEMATICS_DIR`` when set, otherwise
                          Windows ``%APPDATA%``, macOS ``~/Library/Application Support``,
                          Linux ``~/.local/share``, then ``.../ModrinthApp/profiles/Craftsmen/schematics``.
         data_version:  Minecraft data version.
@@ -298,7 +350,11 @@ def save_schem(
         filename = make_schem_name()
 
     if schematics_dir is None:
-        schematics_dir = _default_schematics_dir()
+        override = os.getenv("CRAFTSMEN_SCHEMATICS_DIR")
+        if override:
+            schematics_dir = os.path.expandvars(os.path.expanduser(override))
+        else:
+            schematics_dir = _default_schematics_dir()
 
     os.makedirs(schematics_dir, exist_ok=True)
     path = os.path.join(schematics_dir, filename)
@@ -335,3 +391,14 @@ def save_world_state(
     """
     plan = world_state.to_block_ops()
     return save_schem(plan, size, filename, schematics_dir, data_version)
+
+
+def filter_plan_for_schematic(plan: List[BlockOp]) -> Tuple[List[BlockOp], List[str]]:
+    """
+    Public helper for evaluation code.
+
+    Apply the same blacklist filtering that ``plan_to_schem`` uses and
+    return ``(filtered_plan, removed_block_ids)``.  This does not write
+    any files or modify the input list.
+    """
+    return _filter_blacklisted(plan)

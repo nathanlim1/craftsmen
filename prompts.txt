@@ -1,0 +1,61 @@
+# prompts.txt
+# AI Craftsmen (Minecraft) prompt pack
+#
+# These prompts are written to work well with the current code defaults:
+# - Build volume: 7 x 7 x 7 (width x height x length)
+# - Allowed blocks (palette):
+#   minecraft:oak_planks, minecraft:oak_log, minecraft:glass, minecraft:cobblestone,
+#   minecraft:oak_stairs, minecraft:oak_slab, minecraft:torch
+# - Avoid multi-part blocks (doors, beds, etc.). Use an open doorway instead.
+#
+# Tip: Keep builds compact, symmetric, and within 7 blocks tall.
+
+# --- Small buildings / shelters ---
+Build a small wooden hut that fits inside a 7x7 footprint and is at most 6 blocks tall. Use oak_log corner pillars, oak_planks walls and floor, a simple sloped roof with oak_stairs, two glass windows, an open 2-block-tall doorway, and 2 torches by the entrance.
+
+Build a tiny cobblestone-and-wood shed in a 6x6 footprint. Cobblestone base (1 block tall), oak_planks walls, oak_slab flat roof, one glass window, and an open doorway centered on one side. Add torches inside near the ceiling corners.
+
+Build a compact “watch hut” with a raised 1-block cobblestone foundation and a 1-block-high porch lip made of oak_slab. Oak_log pillars on corners. Oak_planks walls with two glass windows. Roof: oak_stairs sloped roof with a 1-block overhang. Two torches on porch posts.
+
+Build a tiny greenhouse cube that fits inside 7x7x7: cobblestone border along the ground edge, oak_planks floor, oak_log corner posts, glass walls on all sides, and an oak_slab roof. Leave a 2-block-tall opening as the entrance.
+
+# --- Outdoor structures / decor ---
+Build a small stone well in the center: 3x3 cobblestone base, 3 blocks tall. Use oak_log posts at two opposite corners and an oak_slab roof over the well. Add 2 torches on the posts.
+
+Build a lamp post: 1x1 cobblestone base (2 blocks tall), oak_log pole (3 blocks), with oak_slab arms and 4 torches around the top to look like a lantern.
+
+Build a simple park bench: oak_slab seat 3 blocks long, oak_stairs as the backrest, and small cobblestone feet. Place it facing outward and add a torch nearby as a “street light.”
+
+Build a small fountain: 5x5 cobblestone ring (1 block tall) with a raised 3x3 center pillar (3 blocks tall) made of cobblestone. Add oak_slab trim around the top edges like a decorative cap. (No water; just the structure.)
+
+Build a decorative archway entrance: two oak_log pillars (4 blocks tall) with an oak_slab top beam and oak_stairs as side accents. Add torches on the pillars at eye level.
+
+# --- Bridges / paths ---
+Build a tiny cobblestone footbridge that spans a 5-block length: cobblestone deck, oak_slab railings on both sides, and torches at both ends. Keep it low (max 3 blocks tall).
+
+Build a short “stepping path” scene: a 7x7 ground pattern using mostly cobblestone with oak_planks accents, plus two small lamp posts (oak_log + torches) on opposite corners.
+
+# --- Towers / lookout ---
+Build a mini watchtower within 7x7x7: cobblestone base (3x3), oak_log supports, an oak_planks platform near the top (y=5), oak_slab roof, and torches on each corner of the platform. Include a simple staircase feel using oak_stairs inside if possible.
+
+Build a tiny bell-tower style frame: four oak_log pillars (5 blocks tall), cobblestone base plate (5x5, 1 tall), an open middle (no walls), and an oak_slab roof. Add 4 torches inside near the top.
+
+# --- Market / village props ---
+Build a small market stall: cobblestone floor pad (5x3), oak_log posts at corners (3 tall), and an oak_slab roof (flat) with a 1-block overhang. Add 2 torches on the front posts.
+
+Build a compact “notice board”: cobblestone base (2 blocks tall), oak_planks panel (3 wide x 3 tall), and two torches mounted on the sides. Add an oak_slab cap on top.
+
+# --- Statues / shapes (good for testing coordinates) ---
+Build a simple 6-block-tall obelisk statue: cobblestone base (3x3, 1 tall), then a 1x1 oak_log column up the center with oak_slab and oak_stairs accents near the top. Add 4 torches around the base corners.
+
+Build a small “robot” statue that fits in 5x5x6: cobblestone feet, oak_planks body, oak_log arms (1 block each side), a glass “face” window, and torches as “eyes” if possible. Keep it symmetric.
+
+# --- Roof / geometry tests ---
+Build a roof-only demo: make a 7x7 oak_planks floor (1 block tall), then build a clean symmetric gable roof using oak_stairs and oak_slab, max height 6. Add torches on the floor corners.
+
+Build a compact A-frame cabin: oak_planks floor (5x5), oak_log corner posts, and a steep A-frame roof using oak_stairs that comes down close to the ground. Add 2 glass windows and a centered open doorway.
+
+# --- “Rooms” (interior + exterior) ---
+Build a tiny one-room cabin: oak_planks floor (5x5), cobblestone lower wall ring (1 tall), oak_planks upper walls (2 tall), glass windows on two sides, and a roof made of oak_slab. Place torches inside on opposite walls.
+
+Build a small guard post with a windowed front: 5x5 base, open doorway, a 3-wide glass front window, oak_log supports, cobblestone base, and an oak_stairs sloped roof. Add 2 torches inside near the back corners.

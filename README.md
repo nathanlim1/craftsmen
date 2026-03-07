@@ -42,7 +42,7 @@ Baritone is configured to use **`minecraft:red_wool`** as its throwaway scaffold
 |---|---|
 | Minecraft Java Edition | 1.21.1 |
 | MineScript | 5.0b9 (Fabric) |
-| Baritone | Fabric build matching MC version |
+| Baritone | Fabric build mapped to your exact MC version |
 | Python | 3.10+ |
 | Modrinth App | Latest |
 
@@ -70,6 +70,8 @@ In the instance's **Mods** tab, install:
 - **MineScript** 5.0b9
 - **Fabric API** (if prompted)
 - **Baritone** — download the `baritone-standalone-fabric-*.jar` from [releases](https://github.com/cabaletta/baritone/releases) and drop it into the instance's `mods/` folder.
+
+> **Important:** not every Baritone build works on every Minecraft version. Baritone jars are version-mapped — use the build that explicitly targets your exact Minecraft + Fabric version, or commands may fail / not load.
 
 > **Verify Baritone:** Join a test world and type `#help` in chat. If it responds, you're good.
 
@@ -124,12 +126,63 @@ python main.py
 python main.py Build a small oak watchtower
 ```
 
+`main.py` now reads build settings from `build_config.json` (or from the path in `CRAFTSMEN_BUILD_CONFIG`).
+CLI prompt still overrides `prompt` from config.
+
+On startup, `main.py` prints a build-config summary (config path, prompt source, mode, size, origin offset, scaffold block, and palette preview) before connecting.
+
+### Build config
+
+Example `build_config.json`:
+
+```json
+{
+  "prompt": "Build a small oak watchtower",
+  "mode": "baritone",
+  "size": [7, 7, 7],
+  "origin_offset": [3, 0, 0],
+  "scaffold_block": "minecraft:red_wool",
+  "palette": [
+    "minecraft:oak_planks",
+    "minecraft:oak_log",
+    "minecraft:glass"
+  ]
+}
+```
+
+Config fields:
+
+- `prompt` — default natural-language build request.
+- `mode` — `baritone` (write `.schem` + run `#build`) or `auto` (place blocks directly via listener `/setblock`).
+- `size` — `[width, height, length]` bounding box.
+- `origin_offset` — `[dx, dy, dz]` from player position.
+- `scaffold_block` — used by Baritone mode.
+- `palette` — allowed block IDs for plan generation.
+
+Set a custom config path (optional):
+
+```powershell
+$env:CRAFTSMEN_BUILD_CONFIG = "C:\path\to\my_build_config.json"
+```
+
 The program will:
 
 1. **Generate** a block plan via the LLM
-2. **Save** a uniquely-named `.schem` file (e.g. `craftsmen_Build_a_small_oak_watcht_20260303_153012.schem`)
-3. **Print** a materials list — make sure these items are in your inventory
-4. **Send** `#build` to Baritone, which pathfinds and places blocks in survival
+2. **Either** save a uniquely-named `.schem` file (`mode=baritone`) **or** place blocks directly (`mode=auto`)
+3. **Print** a materials list
+4. **Run** Baritone `#build` (baritone mode) or direct placement (auto mode)
+
+`mode=auto` uses direct `/setblock` placement through the listener (creative-like behavior) and does not use Baritone pathfinding.
+
+### Override schematic directory (optional)
+
+If your Modrinth profile is not named `Craftsmen`, set:
+
+```powershell
+$env:CRAFTSMEN_SCHEMATICS_DIR = "C:\Users\<you>\AppData\Roaming\ModrinthApp\profiles\<YourProfile>\schematics"
+```
+
+Then run `python main.py` in the same shell. This path is used for writing `.schem` files.
 
 ### Materials
 
@@ -175,6 +228,20 @@ craftsmen/
 
 Certain multi-part or state-dependent blocks can't be reliably placed by Baritone's `#build`. These are automatically stripped from schematics:
 
+The blacklist now lives in `blacklisted_blocks.json` at the project root. Edit that file to add/remove blocked block IDs without changing Python code.
+
+Supported JSON formats:
+
+```json
+["minecraft:oak_door", "minecraft:oak_stairs"]
+```
+
+or
+
+```json
+{"blocks": ["minecraft:oak_door", "minecraft:oak_stairs"]}
+```
+
 | Category | Examples |
 |---|---|
 | Doors | `oak_door`, `iron_door`, all wood types |
@@ -191,3 +258,51 @@ The LLM palette in `main.py` already excludes these, but the schematic writer ha
 In singleplayer, Minecraft **freezes the world** when the game menu is open. Block placement and Baritone pathing will stall until you unpause.
 
 **Fix:** Open to LAN once per session (`Pause → Open to LAN → Start`). This keeps the world ticking while you work in your terminal.
+
+## Quantitative Evaluation
+
+We evaluate the system at two stages of the pipeline to measure whether the agents correctly generate and translate build plans.
+
+### 1. Planning Validity
+
+Measures whether the LLM generates a valid block plan.
+
+Metrics:
+
+* **Bounds Validity** – fraction of block operations within the allowed build region
+* **Palette Validity** – fraction of operations using allowed block types
+* **Duplicate Coordinate Rate** – how often multiple blocks are assigned to the same coordinate
+* **Plan Size** – total number of block operations generated
+
+These metrics are computed directly from the operation list produced by the `Builder`.
+
+### 2. Operation List → Schematic Fidelity
+
+Measures whether the schematic produced from the operation list accurately represents the intended block placements.
+
+Metrics:
+
+* **Exact Match Rate** – fraction of blocks matching exactly `(x, y, z, block)`
+* **Missing Blocks** – blocks expected but not present in the schematic
+* **Extra Blocks** – blocks present in the schematic but not in the plan
+* **Block Type Mismatch** – coordinates where the wrong block type appears
+
+The schematic is parsed and compared against the filtered plan used by the schematic generator.
+
+---
+
+## Running the Evaluation
+
+Evaluate a single prompt:
+
+```bash
+python evaluate.py --prompt "Build a small wooden hut"
+```
+
+Evaluate multiple prompts from a file:
+
+```bash
+python evaluate.py --prompt-file prompts.txt
+```
+
+Each prompt generates a build plan, creates a schematic, and reports planning validity and schematic fidelity metrics.
