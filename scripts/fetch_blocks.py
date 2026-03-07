@@ -11,7 +11,9 @@ with urllib.request.urlopen(URL) as resp:
 names = sorted(set("minecraft:" + b["name"] for b in data if isinstance(b, dict) and "name" in b))
 
 import os
-out_path = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "block_ids.py"))
+out_path = os.path.normpath(
+    os.path.join(os.path.dirname(__file__), "..", "src", "core", "block_ids.py")
+)
 with open(out_path, "w") as f:
     f.write('"""\nValid Minecraft block IDs (1.20.4) for palette validation.\n')
     f.write("Source: PrismarineJS/minecraft-data\n")
@@ -35,4 +37,4 @@ with open(out_path, "w") as f:
     return valid, invalid
 ''')
 
-print(f"Wrote {len(names)} block IDs to block_ids.py")
+print(f"Wrote {len(names)} block IDs to src/core/block_ids.py")

@@ -8,11 +8,11 @@ from langchain_openai import AzureChatOpenAI, ChatOpenAI
 from langgraph.prebuilt import create_react_agent
 from pydantic import BaseModel, Field
 
-from block_ids import validate_palette
-from builder import BlockOp, Builder
-from minecraft_client import MinecraftClient
-from validator import ValidationAgent
-from world_state import WorldState
+from src.agents.builder import BlockOp, Builder
+from src.core.block_ids import validate_palette
+from src.core.world_state import WorldState
+from src.minecraft_client import MinecraftClient
+from src.agents.validator import ValidationAgent
 
 load_dotenv()
 

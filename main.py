@@ -1,30 +1,25 @@
 import sys
-import json
 import os
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+import json
 import time
 from typing import Any, Dict, List, Tuple
 
-from minecraft_client import MinecraftClient
-from builder import Builder
-from manager import Manager
-from schematic import save_schem, save_world_state, material_list, make_schem_name
+from src.agents.builder import Builder
+from src.agents.manager import Manager
+from src.core.schematic import make_schem_name, material_list, save_schem, save_world_state
+from src.config_defaults import (
+    DEFAULT_ORIGIN_OFFSET,
+    DEFAULT_PALETTE,
+    DEFAULT_SIZE_MULTI,
+    DEFAULT_SIZE_SINGLE,
+    SCAFFOLD_BLOCK,
+)
+from src.minecraft_client import MinecraftClient
 
-
-DEFAULT_PALETTE = [
-    "minecraft:oak_planks",
-    "minecraft:oak_log",
-    "minecraft:glass",
-    "minecraft:cobblestone",
-    "minecraft:oak_stairs",
-    "minecraft:oak_slab",
-    "minecraft:torch",
-]
-
-DEFAULT_SIZE_MULTI = (50, 15, 50)
-DEFAULT_SIZE_SINGLE = (7, 7, 7)
-SCAFFOLD_BLOCK = "minecraft:red_wool"
-DEFAULT_ORIGIN_OFFSET = (3, 0, 0)
-DEFAULT_CONFIG_PATH = os.path.join(os.path.dirname(__file__), "build_config.json")
+DEFAULT_CONFIG_PATH = os.path.join(os.path.dirname(__file__), "config", "build_config.json")
 
 
 def _load_build_config(path: str = DEFAULT_CONFIG_PATH) -> Dict[str, Any]:

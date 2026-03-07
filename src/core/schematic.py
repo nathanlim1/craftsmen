@@ -15,7 +15,7 @@ import time
 from collections import Counter
 from typing import Dict, List, Tuple
 
-from builder import BlockOp
+from src.agents.builder import BlockOp
 
 
 # ── Minimal NBT binary writer ──────────────────────────────────────────────
@@ -107,10 +107,8 @@ def _encode_varint(value: int) -> bytes:
 
 # ── Public API ─────────────────────────────────────────────────────────────
 
-BLACKLIST_FILE = os.path.join(
-    os.path.dirname(__file__),
-    "blacklisted_blocks.json",
-)
+_PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+BLACKLIST_FILE = os.path.join(_PROJECT_ROOT, "config", "blacklisted_blocks.json")
 
 # Fallback when blacklisted_blocks.json is missing
 _DEFAULT_BLACKLISTED_BLOCKS = {

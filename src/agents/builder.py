@@ -6,7 +6,7 @@ from langgraph.graph import END, StateGraph
 from langchain_openai import AzureChatOpenAI, ChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage
 from pydantic import BaseModel, Field
-from minecraft_client import MinecraftClient
+from src.minecraft_client import MinecraftClient
 
 
 load_dotenv()
@@ -332,7 +332,8 @@ class Builder:
 
 
 if __name__ == "__main__":
-    from schematic import save_schem, material_list
+    from src.core.schematic import save_schem, material_list
+    from src.minecraft_client import MinecraftClient
 
     client = MinecraftClient()
     pos = client.get_position()

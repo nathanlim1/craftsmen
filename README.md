@@ -126,14 +126,14 @@ python main.py
 python main.py Build a small oak watchtower
 ```
 
-`main.py` now reads build settings from `build_config.json` (or from the path in `CRAFTSMEN_BUILD_CONFIG`).
+`main.py` now reads build settings from `config/build_config.json` (or from the path in `CRAFTSMEN_BUILD_CONFIG`).
 CLI prompt still overrides `prompt` from config.
 
 On startup, `main.py` prints a build-config summary (config path, prompt source, mode, size, origin offset, scaffold block, and palette preview) before connecting.
 
 ### Build config
 
-Example `build_config.json`:
+Example `config/build_config.json`:
 
 ```json
 {
@@ -214,13 +214,26 @@ Stock your inventory with these items. If Baritone runs out of a material mid-bu
 ```
 craftsmen/
 ├── main.py              # CLI entry point & orchestration
-├── builder.py           # LangGraph + Azure OpenAI plan generation
-├── schematic.py         # Sponge Schematic v2 writer (zero dependencies)
-├── minecraft_client.py  # Socket client for listener communication
+├── evaluate.py          # Quantitative evaluation script
 ├── listener.py          # MineScript in-game server (Baritone bridge)
 ├── requirements.txt     # Python dependencies
+├── src/                 # Core package
+│   ├── agents/          # LLM-based agents (builder, manager, validator)
+│   ├── core/            # Schematic, world state, block IDs
+│   ├── config_defaults.py
+│   └── minecraft_client.py
+├── config/              # Config and data files
+│   ├── build_config.json
+│   ├── blacklisted_blocks.json
+│   └── prompts.txt
+├── scripts/             # Utility scripts
+│   └── fetch_blocks.py
+├── docs/
+│   └── overview.txt
 └── .env                 # Azure OpenAI credentials (not committed)
 ```
+
+Run from the project root: `python main.py` and `python evaluate.py` work directly.
 
 ---
 
@@ -228,7 +241,7 @@ craftsmen/
 
 Certain multi-part or state-dependent blocks can't be reliably placed by Baritone's `#build`. These are automatically stripped from schematics:
 
-The blacklist now lives in `blacklisted_blocks.json` at the project root. Edit that file to add/remove blocked block IDs without changing Python code.
+The blacklist now lives in `config/blacklisted_blocks.json`. Edit that file to add/remove blocked block IDs without changing Python code.
 
 Supported JSON formats:
 
@@ -302,7 +315,7 @@ python evaluate.py --prompt "Build a small wooden hut"
 Evaluate multiple prompts from a file:
 
 ```bash
-python evaluate.py --prompt-file prompts.txt
+python evaluate.py --prompt-file config/prompts.txt
 ```
 
 Each prompt generates a build plan, creates a schematic, and reports planning validity and schematic fidelity metrics.

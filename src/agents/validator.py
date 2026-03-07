@@ -12,7 +12,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_openai import AzureChatOpenAI, ChatOpenAI
 from pydantic import BaseModel, Field
 
-from builder import BlockOp, BlockOpSchema
+from src.agents.builder import BlockOp, BlockOpSchema
 
 load_dotenv()
 
