@@ -46,6 +46,9 @@ For each sub-task, you call the delegate_build tool with:
   minecraft:oak_planks, minecraft:glass). Choose blocks entirely based on your own
   judgment for what fits the build. Air (minecraft:air) is always available.
 
+BLOCKLIST: Do NOT include doors, stairs, beds, trapdoors, tall plants, or other
+multi-part blocks in your palettes—they cannot be placed reliably (use open doorways, etc. instead).
+
 Guidelines:
 - One delegation per structure: each distinct structure (house, barn, well, garden,
   wall, tower, etc.) gets exactly one delegate_build call.

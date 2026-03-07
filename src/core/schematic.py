@@ -7,7 +7,6 @@ No external dependencies — contains a self-contained minimal NBT writer.
 
 import gzip
 import io
-import json
 import os
 import struct
 import sys
@@ -107,100 +106,7 @@ def _encode_varint(value: int) -> bytes:
 
 # ── Public API ─────────────────────────────────────────────────────────────
 
-_PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-BLACKLIST_FILE = os.path.join(_PROJECT_ROOT, "config", "blacklisted_blocks.json")
-
-# Fallback when blacklisted_blocks.json is missing
-_DEFAULT_BLACKLISTED_BLOCKS = {
-    "minecraft:oak_door",
-    "minecraft:spruce_door",
-    "minecraft:birch_door",
-    "minecraft:jungle_door",
-    "minecraft:acacia_door",
-    "minecraft:dark_oak_door",
-    "minecraft:mangrove_door",
-    "minecraft:cherry_door",
-    "minecraft:bamboo_door",
-    "minecraft:crimson_door",
-    "minecraft:warped_door",
-    "minecraft:iron_door",
-    "minecraft:white_bed",
-    "minecraft:orange_bed",
-    "minecraft:magenta_bed",
-    "minecraft:light_blue_bed",
-    "minecraft:yellow_bed",
-    "minecraft:lime_bed",
-    "minecraft:pink_bed",
-    "minecraft:gray_bed",
-    "minecraft:light_gray_bed",
-    "minecraft:cyan_bed",
-    "minecraft:purple_bed",
-    "minecraft:blue_bed",
-    "minecraft:brown_bed",
-    "minecraft:green_bed",
-    "minecraft:red_bed",
-    "minecraft:black_bed",
-    "minecraft:tall_grass",
-    "minecraft:large_fern",
-    "minecraft:sunflower",
-    "minecraft:lilac",
-    "minecraft:rose_bush",
-    "minecraft:peony",
-    "minecraft:tall_seagrass",
-    "minecraft:pitcher_plant",
-    "minecraft:white_banner",
-    "minecraft:black_banner",
-}
-
-
-def _load_blacklisted_blocks(path: str) -> set[str]:
-    """
-    Load block IDs from a JSON file.
-
-    Accepted formats:
-      - ["minecraft:oak_door", ...]
-      - {"blocks": ["minecraft:oak_door", ...]}
-    """
-    with open(path, "r", encoding="utf-8") as f:
-        payload = json.load(f)
-
-    if isinstance(payload, dict):
-        raw_blocks = payload.get("blocks", [])
-    elif isinstance(payload, list):
-        raw_blocks = payload
-    else:
-        raise ValueError(
-            f"Invalid blacklist format in {path}: expected list or object"
-        )
-
-    if not isinstance(raw_blocks, list):
-        raise ValueError(
-            f"Invalid blacklist format in {path}: 'blocks' must be a list"
-        )
-
-    normalized: set[str] = set()
-    for entry in raw_blocks:
-        if not isinstance(entry, str):
-            raise ValueError(
-                f"Invalid blacklist entry in {path}: expected string, got {type(entry).__name__}"
-            )
-        block_id = entry.strip().lower()
-        if block_id:
-            normalized.add(block_id)
-
-    return normalized
-
-
-def _get_blacklisted_blocks() -> set[str]:
-    """Load blacklist from JSON, or fall back to default when file is missing."""
-    if not os.path.exists(BLACKLIST_FILE):
-        return _DEFAULT_BLACKLISTED_BLOCKS
-    return _load_blacklisted_blocks(BLACKLIST_FILE)
-
-
-# Multi-part or state-dependent blocks that Baritone can't reliably place.
-# These are stripped from the plan before writing the schematic.
-BLACKLISTED_BLOCKS = _get_blacklisted_blocks()
+from src.core.blacklist import BLACKLISTED_BLOCKS
 
 
 def _filter_blacklisted(plan: List[BlockOp]) -> Tuple[List[BlockOp], List[str]]:

@@ -1065,12 +1065,22 @@ VALID_MINECRAFT_BLOCKS = frozenset({
 })
 
 def validate_palette(palette: list[str]) -> tuple[list[str], list[str]]:
-    """Validate palette block IDs. Returns (valid_blocks, invalid_blocks)."""
+    """Validate palette block IDs. Returns (valid_blocks, invalid_blocks).
+
+    A block is invalid if it:
+    - Is not a minecraft:* ID
+    - Is not in VALID_MINECRAFT_BLOCKS (not a real block)
+    - Is in the blacklist (doors, beds, tall plants, etc. that Baritone can't place)
+    """
+    from src.core.blacklist import BLACKLISTED_BLOCKS
+
     valid: list[str] = []
     invalid: list[str] = []
     for block in palette:
         base = block.strip().lower().split("[")[0]
         if not base.startswith("minecraft:"):
+            invalid.append(block)
+        elif base in BLACKLISTED_BLOCKS:
             invalid.append(block)
         elif base in VALID_MINECRAFT_BLOCKS:
             valid.append(block.strip().lower())

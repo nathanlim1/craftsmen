@@ -1,6 +1,6 @@
 {
   "_comment": "palette applies only when agent_mode is 'single'. Multi-agent ignores it.",
-  "prompt": "Build a several story oak watchtower",
+  "prompt": "Build a two story 8x8 house.",
   "agent_mode": "multi",
   "placement_mode": "auto",
   "size": [50, 15, 50],
