@@ -258,3 +258,51 @@ The LLM palette in `main.py` already excludes these, but the schematic writer ha
 In singleplayer, Minecraft **freezes the world** when the game menu is open. Block placement and Baritone pathing will stall until you unpause.
 
 **Fix:** Open to LAN once per session (`Pause → Open to LAN → Start`). This keeps the world ticking while you work in your terminal.
+
+## Quantitative Evaluation
+
+We evaluate the system at two stages of the pipeline to measure whether the agents correctly generate and translate build plans.
+
+### 1. Planning Validity
+
+Measures whether the LLM generates a valid block plan.
+
+Metrics:
+
+* **Bounds Validity** – fraction of block operations within the allowed build region
+* **Palette Validity** – fraction of operations using allowed block types
+* **Duplicate Coordinate Rate** – how often multiple blocks are assigned to the same coordinate
+* **Plan Size** – total number of block operations generated
+
+These metrics are computed directly from the operation list produced by the `Builder`.
+
+### 2. Operation List → Schematic Fidelity
+
+Measures whether the schematic produced from the operation list accurately represents the intended block placements.
+
+Metrics:
+
+* **Exact Match Rate** – fraction of blocks matching exactly `(x, y, z, block)`
+* **Missing Blocks** – blocks expected but not present in the schematic
+* **Extra Blocks** – blocks present in the schematic but not in the plan
+* **Block Type Mismatch** – coordinates where the wrong block type appears
+
+The schematic is parsed and compared against the filtered plan used by the schematic generator.
+
+---
+
+## Running the Evaluation
+
+Evaluate a single prompt:
+
+```bash
+python evaluate.py --prompt "Build a small wooden hut"
+```
+
+Evaluate multiple prompts from a file:
+
+```bash
+python evaluate.py --prompt-file prompts.txt
+```
+
+Each prompt generates a build plan, creates a schematic, and reports planning validity and schematic fidelity metrics.

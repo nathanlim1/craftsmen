@@ -85,6 +85,23 @@ class MinecraftClient:
         """Sets the inventory count for a specific block type (Helper for testing)."""
         self._send_command("set_inventory", block_type, count)
 
+    def ensure_materials_if_creative(
+        self,
+        materials: Dict[str, int],
+        scaffold_block: str = "minecraft:red_wool",
+        scaffold_count: int = 64,
+    ) -> Dict[str, Any]:
+        """
+        If the player is in creative mode, give them all blocks from *materials*
+        plus scaffold_block. Returns {"creative": bool, "gave": bool}.
+        """
+        return self._send_command(
+            "ensure_materials_if_creative",
+            materials,
+            scaffold_block,
+            scaffold_count,
+        )
+
     def build_schematic(
         self,
         filename: str,

@@ -10,6 +10,7 @@ import io
 import json
 import os
 import struct
+import sys
 import time
 from collections import Counter
 from typing import Dict, List, Tuple
@@ -278,7 +279,8 @@ def save_schem(
                    timestamped name is generated.
         schematics_dir:  Override path.  Defaults to
                          ``$CRAFTSMEN_SCHEMATICS_DIR`` when set, otherwise
-                         ``%APPDATA%/ModrinthApp/profiles/Craftsmen/schematics``.
+                         Windows ``%APPDATA%``, macOS ``~/Library/Application Support``,
+                         Linux ``~/.local/share``, then ``.../ModrinthApp/profiles/Craftsmen/schematics``.
         data_version:  Minecraft data version.
 
     Returns:
@@ -320,3 +322,14 @@ def save_schem(
         f.write(data)
 
     return path, filename
+
+
+def filter_plan_for_schematic(plan: List[BlockOp]) -> Tuple[List[BlockOp], List[str]]:
+    """
+    Public helper for evaluation code.
+
+    Apply the same blacklist filtering that ``plan_to_schem`` uses and
+    return ``(filtered_plan, removed_block_ids)``.  This does not write
+    any files or modify the input list.
+    """
+    return _filter_blacklisted(plan)

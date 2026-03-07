@@ -187,6 +187,15 @@ def main():
     for block, count in sorted(materials.items()):
         print(f"    {block}: {count}")
 
+    result = client.ensure_materials_if_creative(materials, SCAFFOLD_BLOCK)
+    if result.get("gave"):
+        print("  -> Creative mode: materials + scaffold added to inventory")
+
+    # --- 3. Tell Baritone to #build -----------------------------------------
+
+        print("\n[3/3] Starting Baritone #build (creative mode) ...")
+    else:
+        print("\n[3/3] Starting Baritone #build (survival mode) ...")
     # --- 3. Build execution --------------------------------------------------
     if mode == "baritone":
         print("\n[3/3] Starting Baritone #build (survival mode) ...")
@@ -206,6 +215,7 @@ def main():
     else:
         _place_plan_automatically(client, origin, plan)
         print("\nAuto mode finished. Blocks were placed directly via listener.")
+
 
     client.close()
 
