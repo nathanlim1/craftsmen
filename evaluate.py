@@ -1,7 +1,9 @@
 import argparse
+import datetime
 import gzip
 import io
 import os
+import re
 import struct
 import sys
 from collections import Counter
@@ -408,6 +410,55 @@ def _print_fidelity_metrics(metrics: Mapping[str, Any]) -> None:
         )
 
 
+def _slugify_for_filename(text: str, max_len: int = 48) -> str:
+    slug = re.sub(r"[^a-zA-Z0-9_-]+", "_", text.strip().lower())
+    slug = slug.strip("_")
+    if not slug:
+        return "prompt"
+    return slug[:max_len]
+
+
+def _write_evaluation_markdown(
+    prompt: str,
+    schem_path: str,
+    plan_metrics: Mapping[str, Any],
+    fidelity_metrics: Mapping[str, Any],
+) -> str:
+    evaluations_dir = os.path.abspath("evaluations")
+    os.makedirs(evaluations_dir, exist_ok=True)
+
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    report_name = f"evaluation_{_slugify_for_filename(prompt)}_{timestamp}.md"
+    report_path = os.path.join(evaluations_dir, report_name)
+
+    abs_schem_path = os.path.abspath(schem_path)
+    rel_schem_path = os.path.relpath(abs_schem_path, evaluations_dir).replace("\\", "/")
+
+    lines: List[str] = [
+        "# Evaluation Report",
+        "",
+        f"- Generated: `{datetime.datetime.now().isoformat(timespec='seconds')}`",
+        f"- Prompt: `{prompt}`",
+        f"- Schematic: [{rel_schem_path}]({rel_schem_path})",
+        "",
+        "## Planning Validity Metrics",
+    ]
+
+    for key, value in plan_metrics.items():
+        lines.append(f"- `{key}`: `{value}`")
+
+    lines.append("")
+    lines.append("## Schematic Fidelity Metrics")
+    for key, value in fidelity_metrics.items():
+        lines.append(f"- `{key}`: `{value}`")
+
+    lines.append("")
+    with open(report_path, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines))
+
+    return report_path
+
+
 def run_for_prompt(prompt: str) -> None:
     prompt = prompt.strip()
     if not prompt:
@@ -441,6 +492,13 @@ def run_for_prompt(prompt: str) -> None:
 
     _print_plan_metrics(plan_metrics)
     _print_fidelity_metrics(fidelity_metrics)
+    report_path = _write_evaluation_markdown(
+        prompt=prompt,
+        schem_path=schem_path,
+        plan_metrics=plan_metrics,
+        fidelity_metrics=fidelity_metrics,
+    )
+    print(f"  Evaluation report saved: {report_path}")
 
 
 def main() -> None:
