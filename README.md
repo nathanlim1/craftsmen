@@ -1,5 +1,7 @@
 # 🏗️ Craftsmen
 
+Quarter-long project for Cal Poly SLO CSC580: Artificial Intelligence.
+
 An AI-powered Minecraft builder that turns natural language prompts into real in-game structures — built and placed in **survival mode** by [Baritone](https://github.com/cabaletta/baritone).
 
 > *"Build a small oak cabin"* → LLM generates a block plan → saved as a `.schem` schematic → Baritone pathfinds, scaffolds, and places every block from your inventory.
