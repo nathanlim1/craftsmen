@@ -105,12 +105,14 @@ class Manager:
         max_delegations: int = 10,
         max_blocks_per_sub: int = 600,
         max_retries_per_sub: int = 2,
+        use_validator: bool = True,
     ) -> None:
         self.client = client
         self.model = model
         self.max_delegations = max_delegations
         self.max_blocks_per_sub = max_blocks_per_sub
         self.max_retries_per_sub = max_retries_per_sub
+        self.use_validator = use_validator
         self._llm = self._create_llm()
 
     def _create_llm(self):
@@ -169,7 +171,7 @@ class Manager:
             max_blocks=self.max_blocks_per_sub,
             max_retries=self.max_retries_per_sub,
         )
-        validator = ValidationAgent(model=self.model)
+        validator = ValidationAgent(model=self.model) if self.use_validator else None
 
         max_delegations = self.max_delegations
 
@@ -251,20 +253,23 @@ class Manager:
                 print(f"  [Manager] Sub-builder error: {exc}")
                 return f"Sub-builder error: {exc}"
 
-            zone_size = (
-                zone_max_t[0] - zone_min_t[0] + 1,
-                zone_max_t[1] - zone_min_t[1] + 1,
-                zone_max_t[2] - zone_min_t[2] + 1,
-            )
-            fix_ops = validator.validate(
-                query=query,
-                size=zone_size,
-                placed_blocks=plan,
-                palette=valid_palette,
-            )
-            if fix_ops:
-                print(f"  [Manager] Validator added {len(fix_ops)} fix ops")
-                merged = _merge_ops(plan, fix_ops)
+            if validator is not None:
+                zone_size = (
+                    zone_max_t[0] - zone_min_t[0] + 1,
+                    zone_max_t[1] - zone_min_t[1] + 1,
+                    zone_max_t[2] - zone_min_t[2] + 1,
+                )
+                fix_ops = validator.validate(
+                    query=query,
+                    size=zone_size,
+                    placed_blocks=plan,
+                    palette=valid_palette,
+                )
+                if fix_ops:
+                    print(f"  [Manager] Validator added {len(fix_ops)} fix ops")
+                    merged = _merge_ops(plan, fix_ops)
+                else:
+                    merged = plan
             else:
                 merged = plan
 

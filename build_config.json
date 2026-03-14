@@ -1,0 +1,24 @@
+{
+  "prompt": "Build a several story cobblestone and oak wizard tower with a spiral staircase and a glass dome on top",
+  "mode": "auto",
+  "size": [11, 18, 11],
+  "origin_offset": [3, 0, 3],
+  "scaffold_block": "minecraft:red_wool",
+  "palette": [
+    "minecraft:cobblestone",
+    "minecraft:mossy_cobblestone",
+    "minecraft:stone_bricks",
+    "minecraft:cracked_stone_bricks",
+    "minecraft:oak_planks",
+    "minecraft:oak_log",
+    "minecraft:oak_slab",
+    "minecraft:oak_fence",
+    "minecraft:glass",
+    "minecraft:glass_pane",
+    "minecraft:torch",
+    "minecraft:lantern",
+    "minecraft:cobblestone_slab",
+    "minecraft:stone_brick_slab",
+    "minecraft:bookshelf"
+  ]
+}

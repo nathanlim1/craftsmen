@@ -1,0 +1,223 @@
+{
+    "sizes": [
+        {
+            "small": [
+                {
+                    "ratings": {
+                        "model_a": 2,
+                        "model_b": 4
+                    },
+                    "single_model_guess": "left"
+                },
+                {
+                    "ratings": {
+                        "model_a": 1,
+                        "model_b": 5
+                    },
+                    "single_model_guess": "left"
+                },
+                {
+                    "ratings": {
+                        "model_a": 5,
+                        "model_b": 3
+                    },
+                    "single_model_guess": "right"
+                },
+                {
+                    "ratings": {
+                        "model_a": 4,
+                        "model_b": 3
+                    },
+                    "single_model_guess": "right"
+                },
+                {
+                    "ratings": {
+                        "model_a": 3,
+                        "model_b": 5
+                    },
+                    "single_model_guess": "left"
+                },
+                {
+                    "ratings": {
+                        "model_a": 4,
+                        "model_b": 5
+                    },
+                    "single_model_guess": "left"
+                },
+                {
+                    "ratings": {
+                        "model_a": 5,
+                        "model_b": 4
+                    },
+                    "single_model_guess": "right"
+                },
+                {
+                    "ratings": {
+                        "model_a": 2,
+                        "model_b": 4
+                    },
+                    "single_model_guess": "left"
+                },
+                {
+                    "ratings": {
+                        "model_a": 5,
+                        "model_b": 4
+                    },
+                    "single_model_guess": "right"
+                },
+                {
+                    "ratings": {
+                        "model_a": 5,
+                        "model_b": 2
+                    },
+                    "single_model_guess": "right"
+                },
+                {
+                    "ratings": {
+                        "model_a": 4,
+                        "model_b": 4
+                    },
+                    "single_model_guess": "right"
+                },
+                {
+                    "ratings": {
+                        "model_a": 3,
+                        "model_b": 5
+                    },
+                    "single_model_guess": "left"
+                },
+                {
+                    "ratings": {
+                        "model_a": 4,
+                        "model_b": 5
+                    },
+                    "single_model_guess": "left"
+                },
+                {
+                    "ratings": {
+                        "model_a": 4,
+                        "model_b": 5
+                    },
+                    "single_model_guess": "left"
+                },
+                {
+                    "ratings": {
+                        "model_a": 5,
+                        "model_b": 4
+                    },
+                    "single_model_guess": "right"
+                }
+            ],
+
+            "medium": [
+                {
+                    "ratings": {
+                        "model_a": 5,
+                        "model_b": 3
+                    },
+                    "single_model_guess": "right"
+                },
+                {
+                    "ratings": {
+                        "model_a": 4,
+                        "model_b": 1
+                    },
+                    "single_model_guess": "right"
+                },
+                {
+                    "ratings": {
+                        "model_a": 4,
+                        "model_b": 4
+                    },
+                    "single_model_guess": "right"
+                },
+                {
+                    "ratings": {
+                        "model_a": 3,
+                        "model_b": 4
+                    },
+                    "single_model_guess": "left"
+                },
+                {
+                    "ratings": {
+                        "model_a": 4,
+                        "model_b": 5
+                    },
+                    "single_model_guess": "left"
+                },
+                {
+                    "ratings": {
+                        "model_a": 5,
+                        "model_b": 1
+                    },
+                    "single_model_guess": "right"
+                },
+                {
+                    "ratings": {
+                        "model_a": 4,
+                        "model_b": 5
+                    },
+                    "single_model_guess": "left"
+                },
+                {
+                    "ratings": {
+                        "model_a": 5,
+                        "model_b": 3
+                    },
+                    "single_model_guess": "right"
+                },
+                {
+                    "ratings": {
+                        "model_a": 2,
+                        "model_b": 5
+                    },
+                    "single_model_guess": "left"
+                },
+                {
+                    "ratings": {
+                        "model_a": 5,
+                        "model_b": 1
+                    },
+                    "single_model_guess": "right"
+                }
+            ],
+            "large": [
+                {
+                    "ratings": {
+                        "model_a": 1,
+                        "model_b": 5
+                    },
+                    "single_model_guess": "left"
+                },
+                {
+                    "ratings": {
+                        "model_a": 5,
+                        "model_b": 2
+                    },
+                    "single_model_guess": "right"
+                },
+                {
+                    "ratings": {
+                        "model_a": 5,
+                        "model_b": 1
+                    },
+                    "single_model_guess": "right"
+                },
+                {
+                    "ratings": {
+                        "model_a": 4,
+                        "model_b": 3
+                    },
+                    "single_model_guess": "left"
+                },
+                {
+                    "ratings": {
+                        "model_a": 3,
+                        "model_b": 5
+                    },
+                    "single_model_guess": "left"
+                }
+            ]
+        }
+    ]
+}

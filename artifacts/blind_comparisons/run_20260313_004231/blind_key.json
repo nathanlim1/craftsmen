@@ -1,0 +1,1140 @@
+{
+  "created_at": "2026-03-13 00:42:31",
+  "seed": 258439798,
+  "config_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\config\\build_config.json",
+  "prompt_pool_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\config\\comparison_prompt_pool.json",
+  "iterations": {
+    "small": 15,
+    "medium": 10,
+    "large": 5
+  },
+  "prompt_pool": {
+    "small": {
+      "size": [
+        7,
+        7,
+        7
+      ],
+      "prompts": [
+        "Build a tiny campfire with two logs around it",
+        "Build a small market stall with a simple roof",
+        "Build a tiny stone well",
+        "Build a compact flower garden with a short border",
+        "Build a small wooden gazebo",
+        "Build a tiny watch post"
+      ]
+    },
+    "medium": {
+      "size": [
+        20,
+        10,
+        20
+      ],
+      "prompts": [
+        "Build a medium blacksmith shop",
+        "Build a medium farmhouse with a fenced yard",
+        "Build a medium town square with a fountain",
+        "Build a medium stable with a training yard",
+        "Build a medium chapel with a small garden",
+        "Build a medium dockside warehouse"
+      ]
+    },
+    "large": {
+      "size": [
+        50,
+        15,
+        50
+      ],
+      "prompts": [
+        "Build a large village square with several buildings and paths",
+        "Build a large castle courtyard with towers and a gate",
+        "Build a large walled market district",
+        "Build a large harbor scene with docks and storage buildings",
+        "Build a large temple complex with surrounding landscaping",
+        "Build a large fortified manor with gardens"
+      ]
+    }
+  },
+  "pairs": [
+    {
+      "pair_index": 1,
+      "pair_code": "PAIR 01",
+      "size_label": "small",
+      "size": [
+        7,
+        7,
+        7
+      ],
+      "prompt": "Build a tiny campfire with two logs around it",
+      "iteration": 1,
+      "left": {
+        "mode": "multi",
+        "origin": [
+          9,
+          -60,
+          -6
+        ],
+        "blocks": 28,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_01_left_20260313_004415.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_01_left.log",
+        "error": null
+      },
+      "right": {
+        "mode": "single",
+        "origin": [
+          21,
+          -60,
+          -6
+        ],
+        "blocks": 59,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_01_right_20260313_004415.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_01_right.log",
+        "error": null
+      }
+    },
+    {
+      "pair_index": 2,
+      "pair_code": "PAIR 02",
+      "size_label": "small",
+      "size": [
+        7,
+        7,
+        7
+      ],
+      "prompt": "Build a tiny stone well",
+      "iteration": 2,
+      "left": {
+        "mode": "multi",
+        "origin": [
+          9,
+          -60,
+          7
+        ],
+        "blocks": 108,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_02_left_20260313_004717.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_02_left.log",
+        "error": null
+      },
+      "right": {
+        "mode": "single",
+        "origin": [
+          21,
+          -60,
+          7
+        ],
+        "blocks": 138,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_02_right_20260313_004717.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_02_right.log",
+        "error": null
+      }
+    },
+    {
+      "pair_index": 3,
+      "pair_code": "PAIR 03",
+      "size_label": "small",
+      "size": [
+        7,
+        7,
+        7
+      ],
+      "prompt": "Build a tiny watch post",
+      "iteration": 3,
+      "left": {
+        "mode": "single",
+        "origin": [
+          9,
+          -60,
+          20
+        ],
+        "blocks": 161,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_03_left_20260313_005053.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_03_left.log",
+        "error": null
+      },
+      "right": {
+        "mode": "multi",
+        "origin": [
+          21,
+          -60,
+          20
+        ],
+        "blocks": 111,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_03_right_20260313_005053.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_03_right.log",
+        "error": null
+      }
+    },
+    {
+      "pair_index": 4,
+      "pair_code": "PAIR 04",
+      "size_label": "small",
+      "size": [
+        7,
+        7,
+        7
+      ],
+      "prompt": "Build a tiny stone well",
+      "iteration": 4,
+      "left": {
+        "mode": "single",
+        "origin": [
+          9,
+          -60,
+          33
+        ],
+        "blocks": 90,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_04_left_20260313_005316.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_04_left.log",
+        "error": null
+      },
+      "right": {
+        "mode": "multi",
+        "origin": [
+          21,
+          -60,
+          33
+        ],
+        "blocks": 43,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_04_right_20260313_005316.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_04_right.log",
+        "error": null
+      }
+    },
+    {
+      "pair_index": 5,
+      "pair_code": "PAIR 05",
+      "size_label": "small",
+      "size": [
+        7,
+        7,
+        7
+      ],
+      "prompt": "Build a small market stall with a simple roof",
+      "iteration": 5,
+      "left": {
+        "mode": "multi",
+        "origin": [
+          9,
+          -60,
+          46
+        ],
+        "blocks": 78,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_05_left_20260313_005547.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_05_left.log",
+        "error": null
+      },
+      "right": {
+        "mode": "single",
+        "origin": [
+          21,
+          -60,
+          46
+        ],
+        "blocks": 98,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_05_right_20260313_005547.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_05_right.log",
+        "error": null
+      }
+    },
+    {
+      "pair_index": 6,
+      "pair_code": "PAIR 06",
+      "size_label": "small",
+      "size": [
+        7,
+        7,
+        7
+      ],
+      "prompt": "Build a small market stall with a simple roof",
+      "iteration": 6,
+      "left": {
+        "mode": "multi",
+        "origin": [
+          9,
+          -60,
+          59
+        ],
+        "blocks": 82,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_06_left_20260313_005807.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_06_left.log",
+        "error": null
+      },
+      "right": {
+        "mode": "single",
+        "origin": [
+          21,
+          -60,
+          59
+        ],
+        "blocks": 117,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_06_right_20260313_005807.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_06_right.log",
+        "error": null
+      }
+    },
+    {
+      "pair_index": 7,
+      "pair_code": "PAIR 07",
+      "size_label": "small",
+      "size": [
+        7,
+        7,
+        7
+      ],
+      "prompt": "Build a tiny campfire with two logs around it",
+      "iteration": 7,
+      "left": {
+        "mode": "single",
+        "origin": [
+          9,
+          -60,
+          72
+        ],
+        "blocks": 61,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_07_left_20260313_005937.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_07_left.log",
+        "error": null
+      },
+      "right": {
+        "mode": "multi",
+        "origin": [
+          21,
+          -60,
+          72
+        ],
+        "blocks": 22,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_07_right_20260313_005937.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_07_right.log",
+        "error": null
+      }
+    },
+    {
+      "pair_index": 8,
+      "pair_code": "PAIR 08",
+      "size_label": "small",
+      "size": [
+        7,
+        7,
+        7
+      ],
+      "prompt": "Build a tiny stone well",
+      "iteration": 8,
+      "left": {
+        "mode": "multi",
+        "origin": [
+          9,
+          -60,
+          85
+        ],
+        "blocks": 67,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_08_left_20260313_010231.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_08_left.log",
+        "error": null
+      },
+      "right": {
+        "mode": "single",
+        "origin": [
+          21,
+          -60,
+          85
+        ],
+        "blocks": 137,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_08_right_20260313_010231.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_08_right.log",
+        "error": null
+      }
+    },
+    {
+      "pair_index": 9,
+      "pair_code": "PAIR 09",
+      "size_label": "small",
+      "size": [
+        7,
+        7,
+        7
+      ],
+      "prompt": "Build a tiny campfire with two logs around it",
+      "iteration": 9,
+      "left": {
+        "mode": "single",
+        "origin": [
+          9,
+          -60,
+          98
+        ],
+        "blocks": 58,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_09_left_20260313_010339.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_09_left.log",
+        "error": null
+      },
+      "right": {
+        "mode": "multi",
+        "origin": [
+          21,
+          -60,
+          98
+        ],
+        "blocks": 12,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_09_right_20260313_010339.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_09_right.log",
+        "error": null
+      }
+    },
+    {
+      "pair_index": 10,
+      "pair_code": "PAIR 10",
+      "size_label": "small",
+      "size": [
+        7,
+        7,
+        7
+      ],
+      "prompt": "Build a compact flower garden with a short border",
+      "iteration": 10,
+      "left": {
+        "mode": "single",
+        "origin": [
+          9,
+          -60,
+          111
+        ],
+        "blocks": 55,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_10_left_20260313_010548.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_10_left.log",
+        "error": null
+      },
+      "right": {
+        "mode": "multi",
+        "origin": [
+          21,
+          -60,
+          111
+        ],
+        "blocks": 69,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_10_right_20260313_010548.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_10_right.log",
+        "error": null
+      }
+    },
+    {
+      "pair_index": 11,
+      "pair_code": "PAIR 11",
+      "size_label": "small",
+      "size": [
+        7,
+        7,
+        7
+      ],
+      "prompt": "Build a tiny campfire with two logs around it",
+      "iteration": 11,
+      "left": {
+        "mode": "single",
+        "origin": [
+          9,
+          -60,
+          124
+        ],
+        "blocks": 12,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_11_left_20260313_010700.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_11_left.log",
+        "error": null
+      },
+      "right": {
+        "mode": "multi",
+        "origin": [
+          21,
+          -60,
+          124
+        ],
+        "blocks": 12,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_11_right_20260313_010700.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_11_right.log",
+        "error": null
+      }
+    },
+    {
+      "pair_index": 12,
+      "pair_code": "PAIR 12",
+      "size_label": "small",
+      "size": [
+        7,
+        7,
+        7
+      ],
+      "prompt": "Build a small market stall with a simple roof",
+      "iteration": 12,
+      "left": {
+        "mode": "multi",
+        "origin": [
+          9,
+          -60,
+          137
+        ],
+        "blocks": 97,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_12_left_20260313_011013.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_12_left.log",
+        "error": null
+      },
+      "right": {
+        "mode": "single",
+        "origin": [
+          21,
+          -60,
+          137
+        ],
+        "blocks": 159,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_12_right_20260313_011013.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_12_right.log",
+        "error": null
+      }
+    },
+    {
+      "pair_index": 13,
+      "pair_code": "PAIR 13",
+      "size_label": "small",
+      "size": [
+        7,
+        7,
+        7
+      ],
+      "prompt": "Build a tiny campfire with two logs around it",
+      "iteration": 13,
+      "left": {
+        "mode": "multi",
+        "origin": [
+          9,
+          -60,
+          150
+        ],
+        "blocks": 17,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_13_left_20260313_011127.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_13_left.log",
+        "error": null
+      },
+      "right": {
+        "mode": "single",
+        "origin": [
+          21,
+          -60,
+          150
+        ],
+        "blocks": 60,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_13_right_20260313_011127.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_13_right.log",
+        "error": null
+      }
+    },
+    {
+      "pair_index": 14,
+      "pair_code": "PAIR 14",
+      "size_label": "small",
+      "size": [
+        7,
+        7,
+        7
+      ],
+      "prompt": "Build a compact flower garden with a short border",
+      "iteration": 14,
+      "left": {
+        "mode": "multi",
+        "origin": [
+          9,
+          -60,
+          163
+        ],
+        "blocks": 68,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_14_left_20260313_011315.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_14_left.log",
+        "error": null
+      },
+      "right": {
+        "mode": "single",
+        "origin": [
+          21,
+          -60,
+          163
+        ],
+        "blocks": 80,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_14_right_20260313_011315.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_14_right.log",
+        "error": null
+      }
+    },
+    {
+      "pair_index": 15,
+      "pair_code": "PAIR 15",
+      "size_label": "small",
+      "size": [
+        7,
+        7,
+        7
+      ],
+      "prompt": "Build a small market stall with a simple roof",
+      "iteration": 15,
+      "left": {
+        "mode": "single",
+        "origin": [
+          9,
+          -60,
+          176
+        ],
+        "blocks": 109,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_15_left_20260313_011556.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_15_left.log",
+        "error": null
+      },
+      "right": {
+        "mode": "multi",
+        "origin": [
+          21,
+          -60,
+          176
+        ],
+        "blocks": 52,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_15_right_20260313_011556.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_15_right.log",
+        "error": null
+      }
+    },
+    {
+      "pair_index": 16,
+      "pair_code": "PAIR 16",
+      "size_label": "medium",
+      "size": [
+        20,
+        10,
+        20
+      ],
+      "prompt": "Build a medium town square with a fountain",
+      "iteration": 1,
+      "left": {
+        "mode": "single",
+        "origin": [
+          9,
+          -60,
+          209
+        ],
+        "blocks": 334,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_16_left_20260313_012240.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_16_left.log",
+        "error": null
+      },
+      "right": {
+        "mode": "multi",
+        "origin": [
+          34,
+          -60,
+          209
+        ],
+        "blocks": 803,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_16_right_20260313_012240.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_16_right.log",
+        "error": null
+      }
+    },
+    {
+      "pair_index": 17,
+      "pair_code": "PAIR 17",
+      "size_label": "medium",
+      "size": [
+        20,
+        10,
+        20
+      ],
+      "prompt": "Build a medium town square with a fountain",
+      "iteration": 2,
+      "left": {
+        "mode": "single",
+        "origin": [
+          9,
+          -60,
+          235
+        ],
+        "blocks": 244,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_17_left_20260313_012726.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_17_left.log",
+        "error": null
+      },
+      "right": {
+        "mode": "multi",
+        "origin": [
+          34,
+          -60,
+          235
+        ],
+        "blocks": 320,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_17_right_20260313_012726.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_17_right.log",
+        "error": null
+      }
+    },
+    {
+      "pair_index": 18,
+      "pair_code": "PAIR 18",
+      "size_label": "medium",
+      "size": [
+        20,
+        10,
+        20
+      ],
+      "prompt": "Build a medium town square with a fountain",
+      "iteration": 3,
+      "left": {
+        "mode": "single",
+        "origin": [
+          9,
+          -60,
+          261
+        ],
+        "blocks": 607,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_18_left_20260313_013509.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_18_left.log",
+        "error": null
+      },
+      "right": {
+        "mode": "multi",
+        "origin": [
+          34,
+          -60,
+          261
+        ],
+        "blocks": 243,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_18_right_20260313_013509.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_18_right.log",
+        "error": null
+      }
+    },
+    {
+      "pair_index": 19,
+      "pair_code": "PAIR 19",
+      "size_label": "medium",
+      "size": [
+        20,
+        10,
+        20
+      ],
+      "prompt": "Build a medium blacksmith shop",
+      "iteration": 4,
+      "left": {
+        "mode": "single",
+        "origin": [
+          9,
+          -60,
+          287
+        ],
+        "blocks": 283,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_19_left_20260313_014050.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_19_left.log",
+        "error": null
+      },
+      "right": {
+        "mode": "multi",
+        "origin": [
+          34,
+          -60,
+          287
+        ],
+        "blocks": 383,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_19_right_20260313_014050.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_19_right.log",
+        "error": null
+      }
+    },
+    {
+      "pair_index": 20,
+      "pair_code": "PAIR 20",
+      "size_label": "medium",
+      "size": [
+        20,
+        10,
+        20
+      ],
+      "prompt": "Build a medium farmhouse with a fenced yard",
+      "iteration": 5,
+      "left": {
+        "mode": "multi",
+        "origin": [
+          9,
+          -60,
+          313
+        ],
+        "blocks": 507,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_20_left_20260313_015028.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_20_left.log",
+        "error": null
+      },
+      "right": {
+        "mode": "single",
+        "origin": [
+          34,
+          -60,
+          313
+        ],
+        "blocks": 463,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_20_right_20260313_015028.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_20_right.log",
+        "error": null
+      }
+    },
+    {
+      "pair_index": 21,
+      "pair_code": "PAIR 21",
+      "size_label": "medium",
+      "size": [
+        20,
+        10,
+        20
+      ],
+      "prompt": "Build a medium chapel with a small garden",
+      "iteration": 6,
+      "left": {
+        "mode": "single",
+        "origin": [
+          9,
+          -60,
+          339
+        ],
+        "blocks": 173,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_21_left_20260313_020426.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_21_left.log",
+        "error": null
+      },
+      "right": {
+        "mode": "multi",
+        "origin": [
+          34,
+          -60,
+          339
+        ],
+        "blocks": 353,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_21_right_20260313_020426.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_21_right.log",
+        "error": null
+      }
+    },
+    {
+      "pair_index": 22,
+      "pair_code": "PAIR 22",
+      "size_label": "medium",
+      "size": [
+        20,
+        10,
+        20
+      ],
+      "prompt": "Build a medium stable with a training yard",
+      "iteration": 7,
+      "left": {
+        "mode": "multi",
+        "origin": [
+          9,
+          -60,
+          365
+        ],
+        "blocks": 720,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_22_left_20260313_021758.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_22_left.log",
+        "error": null
+      },
+      "right": {
+        "mode": "single",
+        "origin": [
+          34,
+          -60,
+          365
+        ],
+        "blocks": 333,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_22_right_20260313_021758.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_22_right.log",
+        "error": null
+      }
+    },
+    {
+      "pair_index": 23,
+      "pair_code": "PAIR 23",
+      "size_label": "medium",
+      "size": [
+        20,
+        10,
+        20
+      ],
+      "prompt": "Build a medium blacksmith shop",
+      "iteration": 8,
+      "left": {
+        "mode": "single",
+        "origin": [
+          9,
+          -60,
+          391
+        ],
+        "blocks": 721,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_23_left_20260313_022506.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_23_left.log",
+        "error": null
+      },
+      "right": {
+        "mode": "multi",
+        "origin": [
+          34,
+          -60,
+          391
+        ],
+        "blocks": 356,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_23_right_20260313_022506.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_23_right.log",
+        "error": null
+      }
+    },
+    {
+      "pair_index": 24,
+      "pair_code": "PAIR 24",
+      "size_label": "medium",
+      "size": [
+        20,
+        10,
+        20
+      ],
+      "prompt": "Build a medium blacksmith shop",
+      "iteration": 9,
+      "left": {
+        "mode": "multi",
+        "origin": [
+          9,
+          -60,
+          417
+        ],
+        "blocks": 234,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_24_left_20260313_023527.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_24_left.log",
+        "error": null
+      },
+      "right": {
+        "mode": "single",
+        "origin": [
+          34,
+          -60,
+          417
+        ],
+        "blocks": 349,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_24_right_20260313_023527.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_24_right.log",
+        "error": null
+      }
+    },
+    {
+      "pair_index": 25,
+      "pair_code": "PAIR 25",
+      "size_label": "medium",
+      "size": [
+        20,
+        10,
+        20
+      ],
+      "prompt": "Build a medium dockside warehouse",
+      "iteration": 10,
+      "left": {
+        "mode": "single",
+        "origin": [
+          9,
+          -60,
+          443
+        ],
+        "blocks": 496,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_25_left_20260313_024229.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_25_left.log",
+        "error": null
+      },
+      "right": {
+        "mode": "multi",
+        "origin": [
+          34,
+          -60,
+          443
+        ],
+        "blocks": 264,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_25_right_20260313_024229.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_25_right.log",
+        "error": null
+      }
+    },
+    {
+      "pair_index": 26,
+      "pair_code": "PAIR 26",
+      "size_label": "large",
+      "size": [
+        50,
+        15,
+        50
+      ],
+      "prompt": "Build a large castle courtyard with towers and a gate",
+      "iteration": 1,
+      "left": {
+        "mode": "multi",
+        "origin": [
+          9,
+          -60,
+          489
+        ],
+        "blocks": 2330,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_26_left_20260313_025100.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_26_left.log",
+        "error": null
+      },
+      "right": {
+        "mode": "single",
+        "origin": [
+          64,
+          -60,
+          489
+        ],
+        "blocks": 226,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_26_right_20260313_025100.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_26_right.log",
+        "error": null
+      }
+    },
+    {
+      "pair_index": 27,
+      "pair_code": "PAIR 27",
+      "size_label": "large",
+      "size": [
+        50,
+        15,
+        50
+      ],
+      "prompt": "Build a large village square with several buildings and paths",
+      "iteration": 2,
+      "left": {
+        "mode": "single",
+        "origin": [
+          9,
+          -60,
+          545
+        ],
+        "blocks": 696,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_27_left_20260313_030200.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_27_left.log",
+        "error": null
+      },
+      "right": {
+        "mode": "multi",
+        "origin": [
+          64,
+          -60,
+          545
+        ],
+        "blocks": 1449,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_27_right_20260313_030200.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_27_right.log",
+        "error": null
+      }
+    },
+    {
+      "pair_index": 28,
+      "pair_code": "PAIR 28",
+      "size_label": "large",
+      "size": [
+        50,
+        15,
+        50
+      ],
+      "prompt": "Build a large walled market district",
+      "iteration": 3,
+      "left": {
+        "mode": "single",
+        "origin": [
+          9,
+          -60,
+          601
+        ],
+        "blocks": 681,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_28_left_20260313_031719.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_28_left.log",
+        "error": null
+      },
+      "right": {
+        "mode": "multi",
+        "origin": [
+          64,
+          -60,
+          601
+        ],
+        "blocks": 2419,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_28_right_20260313_031719.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_28_right.log",
+        "error": null
+      }
+    },
+    {
+      "pair_index": 29,
+      "pair_code": "PAIR 29",
+      "size_label": "large",
+      "size": [
+        50,
+        15,
+        50
+      ],
+      "prompt": "Build a large harbor scene with docks and storage buildings",
+      "iteration": 4,
+      "left": {
+        "mode": "multi",
+        "origin": [
+          9,
+          -60,
+          657
+        ],
+        "blocks": 568,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_29_left_20260313_032928.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_29_left.log",
+        "error": null
+      },
+      "right": {
+        "mode": "single",
+        "origin": [
+          64,
+          -60,
+          657
+        ],
+        "blocks": 634,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_29_right_20260313_032928.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_29_right.log",
+        "error": null
+      }
+    },
+    {
+      "pair_index": 30,
+      "pair_code": "PAIR 30",
+      "size_label": "large",
+      "size": [
+        50,
+        15,
+        50
+      ],
+      "prompt": "Build a large castle courtyard with towers and a gate",
+      "iteration": 5,
+      "left": {
+        "mode": "multi",
+        "origin": [
+          9,
+          -60,
+          713
+        ],
+        "blocks": 1527,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_30_left_20260313_034200.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_30_left.log",
+        "error": null
+      },
+      "right": {
+        "mode": "single",
+        "origin": [
+          64,
+          -60,
+          713
+        ],
+        "blocks": 630,
+        "schematic_path": "C:\\Users\\PaulN\\AppData\\Roaming\\ModrinthApp\\profiles\\Craftsmen\\schematics\\craftsmen_pair_30_right_20260313_034200.schem",
+        "log_path": "C:\\Users\\PaulN\\OneDrive\\Documents\\School\\craftsmen\\artifacts\\blind_comparisons\\run_20260313_004231\\logs\\pair_30_right.log",
+        "error": null
+      }
+    }
+  ]
+}

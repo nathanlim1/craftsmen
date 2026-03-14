@@ -1,0 +1,35 @@
+{
+  "small": {
+    "size": [7, 7, 7],
+    "prompts": [
+      "Build a tiny campfire with two logs around it",
+      "Build a small market stall with a simple roof",
+      "Build a tiny stone well",
+      "Build a compact flower garden with a short border",
+      "Build a small wooden gazebo",
+      "Build a tiny watch post"
+    ]
+  },
+  "medium": {
+    "size": [20, 10, 20],
+    "prompts": [
+      "Build a medium blacksmith shop",
+      "Build a medium farmhouse with a fenced yard",
+      "Build a medium town square with a fountain",
+      "Build a medium stable with a training yard",
+      "Build a medium chapel with a small garden",
+      "Build a medium dockside warehouse"
+    ]
+  },
+  "large": {
+    "size": [50, 15, 50],
+    "prompts": [
+      "Build a large village square with several buildings and paths",
+      "Build a large castle courtyard with towers and a gate",
+      "Build a large walled market district",
+      "Build a large harbor scene with docks and storage buildings",
+      "Build a large temple complex with surrounding landscaping",
+      "Build a large fortified manor with gardens"
+    ]
+  }
+}

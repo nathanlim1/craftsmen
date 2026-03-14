@@ -1,7 +1,7 @@
 {
   "_comment": "palette applies only when agent_mode is 'single'. Multi-agent ignores it.",
-  "prompt": "Build a two story 8x8 house.",
-  "agent_mode": "multi",
+  "prompt": "Build a small village with four small houses centered around a small fountain. Make sure the water is trapped in the fountain. There should also be a tree next to the fountain.",
+  "agent_mode": "single",
   "placement_mode": "auto",
   "size": [50, 15, 50],
   "origin_offset": [3, 0, 0],
